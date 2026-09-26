@@ -71,6 +71,10 @@
         <p class="muted">@Model.SubHeading</p>
     </div>
     <div class="reader-tools">
+        @if (Model.Reciters.Count > 0)
+        {
+            <button type="button" class="btn primary" id="listen-btn" title="Écouter depuis le premier verset affiché">▶ Écouter</button>
+        }
         <a class="btn" href="@Model.ToggleViewUrl()">@(Model.Vue == "liste" ? "Vue mushaf" : "Vue liste")</a>
         <span class="size-ctl" role="group" aria-label="Taille du texte">
             <button type="button" data-font="-1" title="Réduire le texte">A−</button>
@@ -114,18 +118,44 @@
             @foreach (var v in verses)
             {
                 var hl = Model.Hl == v.Reference;
-                <span class="aya @(hl ? "hl" : "") @(v.IsSajda ? "sajda" : "")" id="@IndexModel.Anchor(v)"
+                <span class="aya @(hl ? "hl" : "") @(v.IsSajda ? "sajda" : "")" id="@IndexModel.Anchor(v)" data-s="@v.Surah" data-v="@v.Number"
                       title="@v.Reference · Juz @v.Juz · Hizb @v.Hizb · Page @v.Page@(v.IsSajda ? " · Sajda" : "")">
                     @if (Model.Vue == "liste")
                     {
                         <a class="ref" href="@Model.LinkTo("sourate", v.Surah, v.Reference)" dir="ltr">@v.Reference</a>
                     }
-                    @v.Text <span class="num">@v.NumberGlyph</span>
+                    @v.Text <span class="num" role="button" tabindex="0" title="Écouter à partir du verset @v.Reference">@v.NumberGlyph</span>
                 </span>
             }
         </div>
     }
 </article>
+
+@if (Model.Reciters.Count > 0)
+{
+    <div class="player" id="player" role="region" aria-label="Lecteur audio" hidden>
+        <select id="pl-reciter" aria-label="Récitateur">
+            @foreach (var r in Model.Reciters)
+            {
+                <option value="@r.Id">@r.Name — @r.NameAr</option>
+            }
+        </select>
+        <div class="pl-buttons">
+            <button type="button" id="pl-prev" title="Verset précédent" aria-label="Verset précédent">⏮</button>
+            <button type="button" id="pl-play" class="primary" title="Lecture / pause" aria-label="Lecture">▶</button>
+            <button type="button" id="pl-next" title="Verset suivant" aria-label="Verset suivant">⏭</button>
+            <button type="button" id="pl-repeat" title="Répéter le verset" aria-pressed="false">🔁</button>
+            <select id="pl-speed" aria-label="Vitesse" title="Vitesse">
+                <option value="0.75">0,75×</option>
+                <option value="1" selected>1×</option>
+                <option value="1.25">1,25×</option>
+                <option value="1.5">1,5×</option>
+            </select>
+        </div>
+        <span class="pl-status" id="pl-status" aria-live="polite">Touchez un numéro de verset pour écouter</span>
+        <audio id="pl-audio" preload="none"></audio>
+    </div>
+}
 
 <nav class="pager">
     @if (Model.N > 1)
@@ -138,3 +168,7 @@
         <a class="btn" href="@Model.LinkTo(Model.Mode, Model.N + 1)">Suivant ›</a>
     }
 </nav>
+
+@section Scripts {
+    <script src="~/js/player.js" asp-append-version="true"></script>
+}

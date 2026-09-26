@@ -1,17 +1,32 @@
 using System.Globalization;
 using System.Text;
 using Quran.Core;
+using Quran.Web.Audio;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddRazorPages();
 builder.Services.AddSingleton(_ => QuranCorpus.LoadEmbedded());
 builder.Services.AddSingleton<QuranStatistics>();
+builder.Services.Configure<AudioOptions>(builder.Configuration.GetSection("Audio"));
+builder.Services.AddHttpClient<TimingService>(c =>
+{
+    c.Timeout = TimeSpan.FromSeconds(30);
+    c.DefaultRequestHeaders.UserAgent.ParseAdd("QuranWarshWeb/1.0");
+});
 
 var app = builder.Build();
 
 // Chargement du texte au démarrage.
 app.Services.GetRequiredService<QuranStatistics>();
+
+// Option : « dotnet run --project src/Quran.Web -- --telecharger-minutages »
+// télécharge tous les minutages (114 sourates × récitateurs) pour un usage hors ligne, puis quitte.
+if (args.Contains("--telecharger-minutages"))
+{
+    await PrefetchTimingsAsync(app.Services);
+    return;
+}
 
 if (!app.Environment.IsDevelopment())
 {
@@ -21,6 +36,27 @@ if (!app.Environment.IsDevelopment())
 app.UseStaticFiles();
 app.UseRouting();
 app.MapRazorPages();
+
+// ---------- Audio ----------
+app.MapGet("/audio/reciters", (TimingService t) =>
+    t.Options.Reciters.Select(r => new { r.Id, r.Name, r.NameAr, audioUrl = r.AudioUrl }));
+
+app.MapGet("/audio/timings/{reciter}/{surah:int}", async (string reciter, int surah, TimingService t, CancellationToken ct) =>
+{
+    var r = t.Find(reciter);
+    if (r is null) return Results.NotFound(new { error = $"Récitateur « {reciter} » inconnu." });
+    if (surah is < 1 or > 114) return Results.NotFound(new { error = "Sourate inexistante (1–114)." });
+    try
+    {
+        var timings = await t.GetAsync(r, surah, ct);
+        return Results.Ok(new { reciter = r.Id, surah, audio = r.AudioFor(surah), timings });
+    }
+    catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or System.Text.Json.JsonException)
+    {
+        return Results.Json(new { error = "Minutages indisponibles : connexion à mp3quran.net impossible.", detail = ex.Message },
+            statusCode: StatusCodes.Status502BadGateway);
+    }
+});
 
 // ---------- Exports CSV (UTF-8 avec BOM pour Excel) ----------
 app.MapGet("/export/{name}.csv", (string name, QuranStatistics s) =>
@@ -59,6 +95,28 @@ app.MapGet("/export/{name}.csv", (string name, QuranStatistics s) =>
 });
 
 app.Run();
+
+static async Task PrefetchTimingsAsync(IServiceProvider services)
+{
+    using var scope = services.CreateScope();
+    var t = scope.ServiceProvider.GetRequiredService<TimingService>();
+    var corpus = scope.ServiceProvider.GetRequiredService<QuranCorpus>();
+    foreach (var r in t.Options.Reciters)
+    {
+        var mismatches = 0;
+        for (var s = 1; s <= 114; s++)
+        {
+            var timings = await t.GetAsync(r, s);
+            var expected = corpus.GetSurah(s)!.VerseCount;
+            if (timings.Count != expected)
+            {
+                mismatches++;
+                Console.WriteLine($"  ! {r.Id} sourate {s} : {timings.Count} minutages pour {expected} versets");
+            }
+        }
+        Console.WriteLine($"{r.Name} : 114 sourates, {mismatches} écart(s) de nombre de versets.");
+    }
+}
 
 static string Csv(object? v) => v switch
 {

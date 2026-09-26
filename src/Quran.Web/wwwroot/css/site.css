@@ -223,3 +223,29 @@ table.data td.ar { font-size: 1.2rem; }
     .toolbar .picker label { flex: 1; }
     .toolbar select, .toolbar input[type=text] { width: 100%; }
 }
+
+/* ---------- Lecteur audio ---------- */
+.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.num[role=button] { cursor: pointer; border-radius: 50%; }
+.num[role=button]:hover, .num[role=button]:focus-visible { background: var(--surface-2); outline: none; }
+.aya.playing { background: color-mix(in srgb, var(--accent) 16%, transparent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 45%, transparent); }
+body:has(.player:not([hidden])) .footer { padding-bottom: 6rem; }
+.player {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 20;
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: .5rem 1rem;
+    padding: .55rem 1rem calc(.55rem + env(safe-area-inset-bottom));
+    background: var(--surface); border-top: 1px solid var(--border);
+    box-shadow: 0 -4px 16px rgb(0 0 0 / .06);
+}
+.player[hidden] { display: none; }
+.pl-buttons { display: flex; gap: .35rem; align-items: center; }
+.pl-buttons button { min-width: 2.6rem; justify-content: center; font-size: 1.05rem; }
+.pl-buttons button[aria-pressed=true] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+#pl-play { min-width: 3.2rem; }
+.pl-status { font-size: .85rem; color: var(--muted); min-width: 12rem; text-align: center; font-variant-numeric: tabular-nums; }
+#pl-reciter { max-width: 21rem; }
+@media (max-width: 760px) {
+    .player { gap: .4rem; padding: .45rem .5rem calc(.45rem + env(safe-area-inset-bottom)); }
+    #pl-reciter { flex: 1 1 100%; max-width: none; }
+    .pl-status { flex: 1 1 100%; min-width: 0; }
+}

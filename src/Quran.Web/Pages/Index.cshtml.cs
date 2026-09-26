@@ -1,12 +1,15 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.Extensions.Options;
 using Quran.Core;
+using Quran.Web.Audio;
 
 namespace Quran.Web.Pages;
 
-public sealed class IndexModel(QuranCorpus corpus) : PageModel
+public sealed class IndexModel(QuranCorpus corpus, IOptions<AudioOptions> audio) : PageModel
 {
     public QuranCorpus Corpus => corpus;
+    public IReadOnlyList<Reciter> Reciters => audio.Value.Reciters;
 
     /// <summary>sourate | juz | hizb | page</summary>
     [BindProperty(SupportsGet = true)] public string Mode { get; set; } = "sourate";
