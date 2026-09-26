@@ -21,6 +21,8 @@ public sealed class Verse
     public required int Surah { get; init; }
     public required int Number { get; init; }
     public required int Juz { get; init; }
+    /// <summary>Hizb (1–60) selon la division maghrébine du mushaf Warsh (voir data/warsh_hizb.json).</summary>
+    public int Hizb { get; internal set; }
     /// <summary>Page où commence le verset (mushaf Warsh KFGQPC, 604 pages).</summary>
     public required int Page { get; init; }
     /// <summary>Page où finit le verset (différente de Page pour quelques versets à cheval).</summary>
@@ -32,6 +34,10 @@ public sealed class Verse
     public int WordCount => Words.Count;
     public int LetterCount => Words.Sum(w => w.LetterCount);
     public string Reference => $"{Surah}:{Number}";
+    /// <summary>Verset de prosternation (signe ۩ présent dans le texte).</summary>
+    public bool IsSajda => Text.Contains('\u06E9');
+    /// <summary>Glyphe du numéro de verset dans la police KFGQPC (U+FC00 = 1).</summary>
+    public string NumberGlyph => ((char)(0xFC00 + Number - 1)).ToString();
 }
 
 /// <summary>Une sourate.</summary>

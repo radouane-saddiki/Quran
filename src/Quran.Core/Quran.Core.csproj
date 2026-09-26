@@ -5,5 +5,6 @@
   <ItemGroup>
     <!-- Texte Warsh (KFGQPC v2.1) embarqué dans l'assembly -->
     <EmbeddedResource Include="..\..\data\warsh_kfgqpc_v2-1.json" LogicalName="Quran.Core.warsh.json" />
+    <EmbeddedResource Include="..\..\data\warsh_hizb.json" LogicalName="Quran.Core.warsh_hizb.json" />
   </ItemGroup>
 </Project>

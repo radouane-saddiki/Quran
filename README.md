@@ -16,6 +16,7 @@ et une application .NET qui calcule des statistiques sur ce texte.
 | `data/warsh.txt` | Une ligne par verset : `sourate|verset|texte` |
 | `data/warsh.csv` | CSV UTF-8 (avec BOM, s'ouvre directement dans Excel) |
 | `data/suras_warsh.json` | Index des 114 sourates avec leur nombre de versets en Warsh |
+| `data/warsh_hizb.json` | Début de chacun des 60 hizb (division maghrébine) |
 | `reports/` | Statistiques générées (Markdown, CSV, JSON) |
 | `src/`, `tools/` | Application .NET (voir ci-dessous) |
 
@@ -27,7 +28,25 @@ Solution **.NET 8** (`Quran.sln`), sans aucun paquet NuGet externe (fonctionne a
 |---|---|
 | `src/Quran.Core` | Bibliothèque : chargement du texte (embarqué dans l'assembly), normalisation de l'arabe, comptages, fréquences, recherche |
 | `src/Quran.Api` | API web ASP.NET Core (minimal API) qui expose ces calculs en JSON |
+| `src/Quran.Web` | Site web (Razor Pages) : lecture du Coran, recherche, statistiques et graphiques |
 | `tools/Quran.Reports` | Outil console qui génère les rapports du dossier [`reports/`](reports/README.md) |
+
+### Lancer le site web en local
+
+```bash
+dotnet run --project src/Quran.Web
+# puis ouvrir http://localhost:5090/
+```
+
+Dans Visual Studio 2022 : ouvrir `Quran.sln`, définir `Quran.Web` comme projet de démarrage, puis F5.
+
+| Page | Contenu |
+|---|---|
+| **Lecture** (`/`) | Affichage du texte par sourate, juz, hizb ou page du mushaf ; accès direct à un verset (`2:253`) ; vue mushaf ou vue liste ; taille du texte réglable |
+| **Recherche** (`/Recherche`) | Mot ou expression, mode (exact, commence par, se termine par, contient), forme du texte, limitation à une sourate ; répartition par sourate, résultats surlignés, pagination |
+| **Statistiques** (`/Statistiques`) | Chiffres clés, graphiques (versets par sourate, mots par juz et par hizb, fréquence des lettres), mots les plus fréquents, extrêmes, tableau triable des sourates, statistiques d'une sourate, exports CSV |
+
+Le texte est affiché avec la police KFGQPC Warsh (`src/Quran.Web/wwwroot/fonts`), incluse : le site fonctionne sans connexion Internet.
 
 ### Lancer l'API en local
 
@@ -75,6 +94,9 @@ dotnet run --project tools/Quran.Reports -- reports
 - **Mot** : suite de caractères séparée par des espaces et contenant au moins une lettre arabe (les signes isolés comme ۞ ne comptent pas).
 - **Lettre** : lettre arabe de base (ء à ي, plus le ے maghrébin) ; voyelles, shadda, sukūn, petites lettres, signes de pause et tatweel exclus.
 - La recherche porte sur la forme écrite, pas sur les racines : `StartsWith` et `Contains` permettent d'approcher une famille de mots, mais une vraie recherche par racine demanderait des données morphologiques.
+- **Hizb** : les données KFGQPC ne donnent que le juz et la page. Les débuts des 60 hizb (`data/warsh_hizb.json`) ont été
+  déduits des signes ۞ du texte Warsh (qui marquent les huitièmes de hizb) : le 1ᵉʳ hizb d'un juz commence avec le juz,
+  le 2ᵉ au 9ᵉ huitième. Chaque début a été vérifié (signe ۞ ou début de sourate). Ex. : hizb 2 = 2:75 « أَفَتَطْمَعُونَ ».
 - Numérotation de Nāfiʿ : par exemple, l'Āyat al-Kursī (2:255 en Hafs) correspond en Warsh aux versets **2:253–2:254**, la phrase « اَ۬للَّهُ لَآ إِلَٰهَ إِلَّا هُوَ اَ۬لْحَيُّ اُ۬لْقَيُّومُ » formant un verset à part.
 
 ## Affichage
@@ -85,5 +107,6 @@ caractères de la plage U+FC00–U+FDFF (`ﰀ` = 1, `ﰁ` = 2…), que seule la 
 
 ## Source
 
+- Police : KFGQPC Warsh Uthmanic (Complexe du Roi Fahd), via [thetruetruth/quran-data-kfgqpc](https://github.com/thetruetruth/quran-data-kfgqpc).
 - Données : [quran-center/quran-meta](https://github.com/quran-center/quran-meta) (licence MIT, voir `LICENSE-source-quran-meta`),
   fichier `examples/data-check/data/warshData_v2-1.json`, lui-même issu du KFGQPC (qurancomplex.gov.sa).

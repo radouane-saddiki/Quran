@@ -15,6 +15,7 @@
 | Mots distincts (sans diacritiques) | 15 058 |
 | Mots distincts (normalisés) | 14 659 |
 | Juz | 30 |
+| Hizb | 60 |
 | Pages | 604 |
 
 ## Extrêmes
@@ -260,6 +261,6 @@
 ## Fichiers détaillés
 
 - [`summary.json`](summary.json) — vue d'ensemble et extrêmes
-- [`surahs.csv`](surahs.csv), [`juz.csv`](juz.csv), [`pages.csv`](pages.csv) — comptages
+- [`surahs.csv`](surahs.csv), [`juz.csv`](juz.csv), [`hizb.csv`](hizb.csv), [`pages.csv`](pages.csv) — comptages
 - [`letters.csv`](letters.csv) — fréquence des lettres
 - [`words_normalized_top1000.csv`](words_normalized_top1000.csv), [`words_original_top1000.csv`](words_original_top1000.csv) — fréquence des mots

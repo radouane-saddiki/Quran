@@ -1,0 +1,99 @@
+@model BarChart
+@{
+    var ticks = Model.Ticks();
+    var axisMax = Model.AxisMax;
+    string F(double d) => d.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
+    // Élément SVG <text> (le nom est réservé par Razor, d'où cette aide).
+    Microsoft.AspNetCore.Html.IHtmlContent T(double x, double y, string cls, string anchor, string content) =>
+        new Microsoft.AspNetCore.Html.HtmlString(
+            $"<text x=\"{F(x)}\" y=\"{F(y)}\" class=\"{cls}\" text-anchor=\"{anchor}\">{System.Net.WebUtility.HtmlEncode(content)}</text>");
+    // Barre à extrémité arrondie (4 px), carrée côté ligne de base.
+    string ColumnPath(double x, double y, double w, double h)
+    {
+        var r = Math.Min(4, Math.Min(w / 2, h));
+        return $"M{F(x)},{F(y + h)} V{F(y + r)} Q{F(x)},{F(y)} {F(x + r)},{F(y)} H{F(x + w - r)} Q{F(x + w)},{F(y)} {F(x + w)},{F(y + r)} V{F(y + h)} Z";
+    }
+    string RowPath(double x, double y, double w, double h)
+    {
+        var r = Math.Min(4, Math.Min(h / 2, w));
+        return $"M{F(x)},{F(y)} H{F(x + w - r)} Q{F(x + w)},{F(y)} {F(x + w)},{F(y + r)} V{F(y + h - r)} Q{F(x + w)},{F(y + h)} {F(x + w - r)},{F(y + h)} H{F(x)} Z";
+    }
+}
+<figure class="chart">
+    <figcaption>
+        <span class="chart-title">@Model.Title</span>
+        @if (Model.Subtitle is not null)
+        {
+            <span class="chart-sub">@Model.Subtitle</span>
+        }
+    </figcaption>
+
+    @if (!Model.Horizontal)
+    {
+        const double W = 1000, H = 260, ml = 56, mr = 8, mt = 12, mb = 30;
+        var pw = W - ml - mr; var ph = H - mt - mb;
+        var n = Model.Items.Count;
+        var slot = pw / Math.Max(1, n);
+        var bw = Math.Min(24, slot - 2);
+        <div class="chart-scroll">
+            <svg viewBox="0 0 @W @H" class="chart-svg chart-columns" role="img" aria-label="@Model.Title">
+                @foreach (var t in ticks)
+                {
+                    var y = mt + ph - t / axisMax * ph;
+                    <line x1="@ml" x2="@(W - mr)" y1="@F(y)" y2="@F(y)" class="grid" />
+                    @T(ml - 8, y + 4, "tick", "end", Model.Format(t))
+                }
+                @for (var i = 0; i < n; i++)
+                {
+                    var it = Model.Items[i];
+                    var h = axisMax <= 0 ? 0 : it.Value / axisMax * ph;
+                    var x = ml + i * slot + (slot - bw) / 2;
+                    var y = mt + ph - h;
+                    var tip = it.Tooltip ?? $"{it.Label} : {Model.Format(it.Value)}";
+                    <a href="@(it.Href ?? "#")" class="bar-link @(it.Href is null ? "nolink" : "")">
+                        <g class="bar">
+                            <title>@tip</title>
+                            <rect x="@F(ml + i * slot)" y="@mt" width="@F(slot)" height="@ph" class="hit" />
+                            @if (h > 0)
+                            {
+                                <path d="@ColumnPath(x, y, bw, h)" class="mark" />
+                            }
+                        </g>
+                    </a>
+                    @if (i % Model.LabelEvery == 0 || (i == n - 1 && (n - 1) % Model.LabelEvery >= Math.Max(2, Model.LabelEvery / 2)))
+                    {
+                        @T(ml + i * slot + slot / 2, H - 10, "tick", "middle", it.Label)
+                    }
+                }
+                <line x1="@ml" x2="@(W - mr)" y1="@(mt + ph)" y2="@(mt + ph)" class="baseline" />
+            </svg>
+        </div>
+    }
+    else
+    {
+        const double W = 440, rowH = 22, ml = 36, mr = 64, mt = 4;
+        var n = Model.Items.Count;
+        var H = mt * 2 + n * rowH;
+        var pw = W - ml - mr;
+        <svg viewBox="0 0 @W @F(H)" class="chart-svg chart-rows" role="img" aria-label="@Model.Title">
+            @for (var i = 0; i < n; i++)
+            {
+                var it = Model.Items[i];
+                var y = mt + i * rowH;
+                var w = axisMax <= 0 ? 0 : it.Value / axisMax * pw;
+                var tip = it.Tooltip ?? $"{it.Label} : {Model.Format(it.Value)}";
+                <g class="bar">
+                    <title>@tip</title>
+                    <rect x="0" y="@F(y)" width="@W" height="@rowH" class="hit" />
+                    @T(ml - 10, y + rowH / 2 + 5, Model.ArabicLabels ? "row-label ar" : "row-label", "end", it.Label)
+                    @if (w > 0)
+                    {
+                        <path d="@RowPath(ml, y + 3, w, rowH - 6)" class="mark" />
+                    }
+                    @T(ml + w + 6, y + rowH / 2 + 4, "value", "start", Model.Format(it.Value))
+                </g>
+            }
+            <line x1="@ml" x2="@ml" y1="0" y2="@F(H)" class="baseline" />
+        </svg>
+    }
+</figure>

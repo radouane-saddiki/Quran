@@ -4,7 +4,7 @@ public sealed record Summary(
     string Riwaya, string Source,
     int Surahs, int Verses, int Words, int Letters,
     int DistinctWordsOriginal, int DistinctWordsNoDiacritics, int DistinctWordsNormalized,
-    int Juz, int Pages);
+    int Juz, int Hizb, int Pages);
 
 public sealed record SurahStats(
     int Number, string NameAr, string NameEn,
@@ -54,6 +54,7 @@ public sealed class QuranStatistics(QuranCorpus corpus)
             words.Select(w => w.NoDiacritics).Distinct().Count(),
             words.Select(w => w.Normalized).Distinct().Count(),
             Corpus.Verses.Select(v => v.Juz).Distinct().Count(),
+            Corpus.Verses.Select(v => v.Hizb).Distinct().Count(),
             Corpus.Verses.Max(v => v.PageEnd));
     }
 
@@ -66,6 +67,8 @@ public sealed class QuranStatistics(QuranCorpus corpus)
         Math.Round((double)s.LetterCount / s.WordCount, 2));
 
     public IReadOnlyList<GroupStats> GetJuzStats() => Group(v => v.Juz);
+
+    public IReadOnlyList<GroupStats> GetHizbStats() => Group(v => v.Hizb);
 
     public IReadOnlyList<GroupStats> GetPageStats() => Group(v => v.Page);
 
@@ -152,7 +155,7 @@ public sealed class QuranStatistics(QuranCorpus corpus)
     /// Pour une expression, le mode de correspondance s'applique à chaque mot.
     /// </summary>
     public SearchResult Search(string query, SearchMatch match = SearchMatch.Exact,
-        TextForm form = TextForm.Normalized, int? surah = null, int limit = 200)
+        TextForm form = TextForm.Normalized, int? surah = null, int limit = 200, int skip = 0)
     {
         var terms = query.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries)
             .Select(t => ArabicText.ToForm(t, form))
@@ -180,7 +183,7 @@ public sealed class QuranStatistics(QuranCorpus corpus)
                 total++;
                 verses.Add(verse.Id);
                 perSurah[verse.Surah] = perSurah.GetValueOrDefault(verse.Surah) + 1;
-                if (occurrences.Count < limit)
+                if (total > skip && occurrences.Count < limit)
                 {
                     var matched = string.Join(' ', words.Skip(i).Take(terms.Length).Select(w => w.Original));
                     occurrences.Add(new Occurrence(verse.Surah, verse.Number, i + 1, matched, verse.Text));
@@ -193,7 +196,7 @@ public sealed class QuranStatistics(QuranCorpus corpus)
             .ToArray();
 
         return new SearchResult(query, string.Join(' ', terms), form, match, surah,
-            total, verses.Count, perSurah.Count, bySurah, occurrences, total > occurrences.Count);
+            total, verses.Count, perSurah.Count, bySurah, occurrences, total > skip + occurrences.Count);
     }
 
     private static bool Matches(string word, string term, SearchMatch match) => match switch

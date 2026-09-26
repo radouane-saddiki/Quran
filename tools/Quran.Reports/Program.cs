@@ -16,6 +16,7 @@ var utf8Bom = new UTF8Encoding(encoderShouldEmitUTF8Identifier: true);
 var summary = stats.GetSummary();
 var surahs = stats.GetSurahStats();
 var juz = stats.GetJuzStats();
+var hizb = stats.GetHizbStats();
 var pages = stats.GetPageStats();
 var extremes = stats.GetExtremes();
 var letters = stats.GetLetterFrequencies(TextForm.NoDiacritics);
@@ -53,6 +54,8 @@ WriteCsv("surahs.csv", "number,name_ar,name_en,verses,words,letters,first_page,l
     surahs.Select(s => new object?[] { s.Number, s.NameAr, s.NameEn, s.Verses, s.Words, s.Letters, s.FirstPage, s.LastPage, s.FirstJuz, s.AvgWordsPerVerse, s.AvgLettersPerWord }));
 WriteCsv("juz.csv", "juz,verses,words,letters,from,to",
     juz.Select(g => new object?[] { g.Number, g.Verses, g.Words, g.Letters, g.From, g.To }));
+WriteCsv("hizb.csv", "hizb,verses,words,letters,from,to",
+    hizb.Select(g => new object?[] { g.Number, g.Verses, g.Words, g.Letters, g.From, g.To }));
 WriteCsv("pages.csv", "page,verses,words,letters,from,to",
     pages.Select(g => new object?[] { g.Number, g.Verses, g.Words, g.Letters, g.From, g.To }));
 WriteCsv("letters.csv", "rank,letter,count,percent",
@@ -82,6 +85,7 @@ md.AppendLine($"| Mots distincts (texte original) | {N(summary.DistinctWordsOrig
 md.AppendLine($"| Mots distincts (sans diacritiques) | {N(summary.DistinctWordsNoDiacritics)} |");
 md.AppendLine($"| Mots distincts (normalisés) | {N(summary.DistinctWordsNormalized)} |");
 md.AppendLine($"| Juz | {summary.Juz} |");
+md.AppendLine($"| Hizb | {summary.Hizb} |");
 md.AppendLine($"| Pages | {summary.Pages} |").AppendLine();
 
 md.AppendLine("## Extrêmes").AppendLine();
@@ -120,7 +124,7 @@ md.AppendLine();
 
 md.AppendLine("## Fichiers détaillés").AppendLine();
 md.AppendLine("- [`summary.json`](summary.json) — vue d'ensemble et extrêmes");
-md.AppendLine("- [`surahs.csv`](surahs.csv), [`juz.csv`](juz.csv), [`pages.csv`](pages.csv) — comptages");
+md.AppendLine("- [`surahs.csv`](surahs.csv), [`juz.csv`](juz.csv), [`hizb.csv`](hizb.csv), [`pages.csv`](pages.csv) — comptages");
 md.AppendLine("- [`letters.csv`](letters.csv) — fréquence des lettres");
 md.AppendLine("- [`words_normalized_top1000.csv`](words_normalized_top1000.csv), [`words_original_top1000.csv`](words_original_top1000.csv) — fréquence des mots");
 

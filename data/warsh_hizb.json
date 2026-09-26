@@ -1,0 +1,422 @@
+[
+ {
+  "hizb": 1,
+  "surah": 1,
+  "verse": 1,
+  "id": 1,
+  "juz": 1
+ },
+ {
+  "hizb": 2,
+  "surah": 2,
+  "verse": 75,
+  "id": 82,
+  "juz": 1
+ },
+ {
+  "hizb": 3,
+  "surah": 2,
+  "verse": 141,
+  "id": 148,
+  "juz": 2
+ },
+ {
+  "hizb": 4,
+  "surah": 2,
+  "verse": 201,
+  "id": 208,
+  "juz": 2
+ },
+ {
+  "hizb": 5,
+  "surah": 2,
+  "verse": 251,
+  "id": 258,
+  "juz": 3
+ },
+ {
+  "hizb": 6,
+  "surah": 3,
+  "verse": 15,
+  "id": 307,
+  "juz": 3
+ },
+ {
+  "hizb": 7,
+  "surah": 3,
+  "verse": 91,
+  "id": 383,
+  "juz": 4
+ },
+ {
+  "hizb": 8,
+  "surah": 3,
+  "verse": 171,
+  "id": 463,
+  "juz": 4
+ },
+ {
+  "hizb": 9,
+  "surah": 4,
+  "verse": 24,
+  "id": 516,
+  "juz": 5
+ },
+ {
+  "hizb": 10,
+  "surah": 4,
+  "verse": 86,
+  "id": 578,
+  "juz": 5
+ },
+ {
+  "hizb": 11,
+  "surah": 4,
+  "verse": 147,
+  "id": 639,
+  "juz": 6
+ },
+ {
+  "hizb": 12,
+  "surah": 5,
+  "verse": 25,
+  "id": 692,
+  "juz": 6
+ },
+ {
+  "hizb": 13,
+  "surah": 5,
+  "verse": 84,
+  "id": 751,
+  "juz": 7
+ },
+ {
+  "hizb": 14,
+  "surah": 6,
+  "verse": 37,
+  "id": 826,
+  "juz": 7
+ },
+ {
+  "hizb": 15,
+  "surah": 6,
+  "verse": 112,
+  "id": 901,
+  "juz": 8
+ },
+ {
+  "hizb": 16,
+  "surah": 7,
+  "verse": 4,
+  "id": 960,
+  "juz": 8
+ },
+ {
+  "hizb": 17,
+  "surah": 7,
+  "verse": 87,
+  "id": 1043,
+  "juz": 9
+ },
+ {
+  "hizb": 18,
+  "surah": 7,
+  "verse": 171,
+  "id": 1127,
+  "juz": 9
+ },
+ {
+  "hizb": 19,
+  "surah": 8,
+  "verse": 41,
+  "id": 1203,
+  "juz": 10
+ },
+ {
+  "hizb": 20,
+  "surah": 9,
+  "verse": 34,
+  "id": 1272,
+  "juz": 10
+ },
+ {
+  "hizb": 21,
+  "surah": 9,
+  "verse": 94,
+  "id": 1332,
+  "juz": 11
+ },
+ {
+  "hizb": 22,
+  "surah": 10,
+  "verse": 26,
+  "id": 1394,
+  "juz": 11
+ },
+ {
+  "hizb": 23,
+  "surah": 11,
+  "verse": 6,
+  "id": 1483,
+  "juz": 12
+ },
+ {
+  "hizb": 24,
+  "surah": 11,
+  "verse": 83,
+  "id": 1560,
+  "juz": 12
+ },
+ {
+  "hizb": 25,
+  "surah": 12,
+  "verse": 53,
+  "id": 1651,
+  "juz": 13
+ },
+ {
+  "hizb": 26,
+  "surah": 13,
+  "verse": 21,
+  "id": 1730,
+  "juz": 13
+ },
+ {
+  "hizb": 27,
+  "surah": 15,
+  "verse": 1,
+  "id": 1808,
+  "juz": 14
+ },
+ {
+  "hizb": 28,
+  "surah": 16,
+  "verse": 51,
+  "id": 1957,
+  "juz": 14
+ },
+ {
+  "hizb": 29,
+  "surah": 17,
+  "verse": 1,
+  "id": 2035,
+  "juz": 15
+ },
+ {
+  "hizb": 30,
+  "surah": 17,
+  "verse": 99,
+  "id": 2133,
+  "juz": 15
+ },
+ {
+  "hizb": 31,
+  "surah": 18,
+  "verse": 74,
+  "id": 2218,
+  "juz": 16
+ },
+ {
+  "hizb": 32,
+  "surah": 20,
+  "verse": 1,
+  "id": 2349,
+  "juz": 16
+ },
+ {
+  "hizb": 33,
+  "surah": 21,
+  "verse": 1,
+  "id": 2483,
+  "juz": 17
+ },
+ {
+  "hizb": 34,
+  "surah": 22,
+  "verse": 1,
+  "id": 2594,
+  "juz": 17
+ },
+ {
+  "hizb": 35,
+  "surah": 23,
+  "verse": 1,
+  "id": 2670,
+  "juz": 18
+ },
+ {
+  "hizb": 36,
+  "surah": 24,
+  "verse": 21,
+  "id": 2809,
+  "juz": 18
+ },
+ {
+  "hizb": 37,
+  "surah": 25,
+  "verse": 21,
+  "id": 2871,
+  "juz": 19
+ },
+ {
+  "hizb": 38,
+  "surah": 26,
+  "verse": 111,
+  "id": 3038,
+  "juz": 19
+ },
+ {
+  "hizb": 39,
+  "surah": 27,
+  "verse": 58,
+  "id": 3211,
+  "juz": 20
+ },
+ {
+  "hizb": 40,
+  "surah": 28,
+  "verse": 51,
+  "id": 3299,
+  "juz": 20
+ },
+ {
+  "hizb": 41,
+  "surah": 29,
+  "verse": 46,
+  "id": 3382,
+  "juz": 21
+ },
+ {
+  "hizb": 42,
+  "surah": 31,
+  "verse": 21,
+  "id": 3485,
+  "juz": 21
+ },
+ {
+  "hizb": 43,
+  "surah": 33,
+  "verse": 31,
+  "id": 3558,
+  "juz": 22
+ },
+ {
+  "hizb": 44,
+  "surah": 34,
+  "verse": 24,
+  "id": 3624,
+  "juz": 22
+ },
+ {
+  "hizb": 45,
+  "surah": 36,
+  "verse": 27,
+  "id": 3727,
+  "juz": 23
+ },
+ {
+  "hizb": 46,
+  "surah": 37,
+  "verse": 145,
+  "id": 3927,
+  "juz": 23
+ },
+ {
+  "hizb": 47,
+  "surah": 39,
+  "verse": 31,
+  "id": 4081,
+  "juz": 24
+ },
+ {
+  "hizb": 48,
+  "surah": 40,
+  "verse": 41,
+  "id": 4163,
+  "juz": 24
+ },
+ {
+  "hizb": 49,
+  "surah": 41,
+  "verse": 46,
+  "id": 4252,
+  "juz": 25
+ },
+ {
+  "hizb": 50,
+  "surah": 43,
+  "verse": 23,
+  "id": 4332,
+  "juz": 25
+ },
+ {
+  "hizb": 51,
+  "surah": 46,
+  "verse": 1,
+  "id": 4491,
+  "juz": 26
+ },
+ {
+  "hizb": 52,
+  "surah": 48,
+  "verse": 18,
+  "id": 4581,
+  "juz": 26
+ },
+ {
+  "hizb": 53,
+  "surah": 51,
+  "verse": 31,
+  "id": 4686,
+  "juz": 27
+ },
+ {
+  "hizb": 54,
+  "surah": 55,
+  "verse": 1,
+  "id": 4879,
+  "juz": 27
+ },
+ {
+  "hizb": 55,
+  "surah": 58,
+  "verse": 1,
+  "id": 5083,
+  "juz": 28
+ },
+ {
+  "hizb": 56,
+  "surah": 62,
+  "verse": 1,
+  "id": 5155,
+  "juz": 28
+ },
+ {
+  "hizb": 57,
+  "surah": 67,
+  "verse": 1,
+  "id": 5219,
+  "juz": 29
+ },
+ {
+  "hizb": 58,
+  "surah": 72,
+  "verse": 1,
+  "id": 5428,
+  "juz": 29
+ },
+ {
+  "hizb": 59,
+  "surah": 78,
+  "verse": 1,
+  "id": 5649,
+  "juz": 30
+ },
+ {
+  "hizb": 60,
+  "surah": 87,
+  "verse": 1,
+  "id": 5924,
+  "juz": 30
+ }
+]

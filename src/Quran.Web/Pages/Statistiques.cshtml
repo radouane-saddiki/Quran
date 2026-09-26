@@ -1,0 +1,173 @@
+@page
+@model StatistiquesModel
+@{
+    ViewData["Title"] = "Statistiques";
+    ViewData["Nav"] = "stats";
+    var sum = Model.Summary;
+    var sc = Model.ScopeStats;
+    string F(double v, string f = "N0") => StatistiquesModel.Fmt(v, f);
+}
+
+<section class="stats-head">
+    <div>
+        <h1>Statistiques @(Model.Scope is null ? "du Coran" : $"— sourate {Model.Scope.Number}")</h1>
+        @if (Model.Scope is not null)
+        {
+            <p class="muted"><span class="ar">@Model.Scope.NameAr</span> · @Model.Scope.NameEn · <a href="/?mode=sourate&n=@Model.Scope.Number">Lire la sourate</a></p>
+        }
+        else
+        {
+            <p class="muted">Riwayat Warsh ʿan Nāfiʿ · comptage de Nāfiʿ (basmala non comptée)</p>
+        }
+    </div>
+    <form method="get" class="picker">
+        <input type="hidden" name="form" value="@Model.Form" />
+        <input type="hidden" name="top" value="@Model.Top" />
+        <label>Portée
+            <select name="surah" data-autosubmit>
+                <option value="">Tout le Coran</option>
+                @foreach (var s in Model.Corpus.Surahs)
+                {
+                    <option value="@s.Number" selected="@(Model.Surah == s.Number)">@s.Number. @s.NameEn — @s.NameAr</option>
+                }
+            </select>
+        </label>
+    </form>
+</section>
+
+<section class="tiles">
+    @if (sc is null)
+    {
+        <div class="tile"><span class="tile-value">@F(sum.Surahs)</span><span class="tile-label">sourates</span></div>
+        <div class="tile"><span class="tile-value">@F(sum.Verses)</span><span class="tile-label">versets</span></div>
+        <div class="tile"><span class="tile-value">@F(sum.Words)</span><span class="tile-label">mots</span></div>
+        <div class="tile"><span class="tile-value">@F(sum.Letters)</span><span class="tile-label">lettres</span></div>
+        <div class="tile"><span class="tile-value">@F(sum.DistinctWordsNormalized)</span><span class="tile-label">mots distincts (normalisés)</span></div>
+        <div class="tile"><span class="tile-value">@sum.Juz · @sum.Hizb · @sum.Pages</span><span class="tile-label">juz · hizb · pages</span></div>
+    }
+    else
+    {
+        <div class="tile"><span class="tile-value">@F(sc.Verses)</span><span class="tile-label">versets</span></div>
+        <div class="tile"><span class="tile-value">@F(sc.Words)</span><span class="tile-label">mots</span></div>
+        <div class="tile"><span class="tile-value">@F(sc.Letters)</span><span class="tile-label">lettres</span></div>
+        <div class="tile"><span class="tile-value">@F(Model.DistinctWords)</span><span class="tile-label">mots distincts (@StatistiquesModel.FormLabel(Model.Form))</span></div>
+        <div class="tile"><span class="tile-value">@F(sc.AvgWordsPerVerse, "0.00")</span><span class="tile-label">mots par verset</span></div>
+        <div class="tile"><span class="tile-value">@sc.FirstPage–@sc.LastPage</span><span class="tile-label">pages (juz @sc.FirstJuz)</span></div>
+    }
+</section>
+
+@foreach (var c in Model.Charts)
+{
+    <partial name="_BarChart" model="c" />
+}
+
+<div class="two-col">
+    <section>
+        <partial name="_BarChart" model="Model.Letters" />
+    </section>
+
+    <section>
+        <h2>Mots les plus fréquents</h2>
+        <form method="get" class="picker inline">
+            @if (Model.Surah is not null) { <input type="hidden" name="surah" value="@Model.Surah" /> }
+            <label>Forme
+                <select name="form" data-autosubmit>
+                    @foreach (var (v, l) in RechercheModel.Forms)
+                    {
+                        <option value="@v" selected="@(Model.Form == v)">@l</option>
+                    }
+                </select>
+            </label>
+            <label>Lettres min.
+                <select name="minLetters" data-autosubmit>
+                    @for (var i = 1; i <= 6; i++)
+                    {
+                        <option value="@i" selected="@(Model.MinLetters == i)">@i</option>
+                    }
+                </select>
+            </label>
+            <label>Nombre
+                <select name="top" data-autosubmit>
+                    @foreach (var t in new[] { 20, 50, 100, 200, 500 })
+                    {
+                        <option value="@t" selected="@(Model.Top == t)">@t</option>
+                    }
+                </select>
+            </label>
+        </form>
+        <p class="muted">@F(Model.Words.Total) mots comptés · @F(Model.Words.Distinct) distincts</p>
+        <div class="table-wrap">
+            <table class="data sortable">
+                <thead><tr><th class="num">Rang</th><th>Mot</th><th class="num">Occurrences</th><th class="num">%</th></tr></thead>
+                <tbody>
+                    @foreach (var w in Model.Words.Items)
+                    {
+                        <tr>
+                            <td class="num">@w.Rank</td>
+                            <td class="ar"><a href="/Recherche?q=@Uri.EscapeDataString(w.Value)&form=@Model.Form@(Model.Surah is null ? "" : $"&surah={Model.Surah}")">@w.Value</a></td>
+                            <td class="num" data-v="@w.Count">@F(w.Count)</td>
+                            <td class="num" data-v="@w.Percent.ToString(System.Globalization.CultureInfo.InvariantCulture)">@F(w.Percent, "0.00")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>
+
+@if (Model.Scope is null)
+{
+    var ex = Model.Extremes;
+    <section>
+        <h2>Extrêmes</h2>
+        <div class="extremes">
+            <div><span class="muted">Sourate la plus longue</span><a href="/Statistiques?surah=@ex.LongestSurahByVerses.Number">@ex.LongestSurahByVerses.NameEn</a> <span>@ex.LongestSurahByVerses.Value versets</span></div>
+            <div><span class="muted">Sourate la plus courte</span><a href="/Statistiques?surah=@ex.ShortestSurahByVerses.Number">@ex.ShortestSurahByVerses.NameEn</a> <span>@ex.ShortestSurahByVerses.Value versets</span></div>
+            <div><span class="muted">Verset le plus long</span><a href="/?mode=sourate&n=@ex.LongestVerseByWords.Surah&hl=@ex.LongestVerseByWords.Surah:@ex.LongestVerseByWords.Verse#v@(ex.LongestVerseByWords.Surah)-@(ex.LongestVerseByWords.Verse)">@ex.LongestVerseByWords.Surah:@ex.LongestVerseByWords.Verse</a> <span>@ex.LongestVerseByWords.Words mots</span></div>
+            <div><span class="muted">Verset le plus court</span><a href="/?mode=sourate&n=@ex.ShortestVerseByLetters.Surah&hl=@ex.ShortestVerseByLetters.Surah:@ex.ShortestVerseByLetters.Verse#v@(ex.ShortestVerseByLetters.Surah)-@(ex.ShortestVerseByLetters.Verse)">@ex.ShortestVerseByLetters.Surah:@ex.ShortestVerseByLetters.Verse</a> <span>@ex.ShortestVerseByLetters.Letters lettres</span></div>
+        </div>
+    </section>
+
+    <section>
+        <h2>Par sourate</h2>
+        <p class="muted">Cliquer un en-tête pour trier.</p>
+        <div class="table-wrap">
+            <table class="data sortable">
+                <thead>
+                    <tr>
+                        <th class="num">N°</th><th>Sourate</th><th class="ar">الاسم</th>
+                        <th class="num">Versets</th><th class="num">Mots</th><th class="num">Lettres</th>
+                        <th class="num">Mots/verset</th><th class="num">Pages</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var s in Model.SurahTable)
+                    {
+                        <tr>
+                            <td class="num" data-v="@s.Number">@s.Number</td>
+                            <td><a href="/Statistiques?surah=@s.Number">@s.NameEn</a></td>
+                            <td class="ar"><a href="/?mode=sourate&n=@s.Number">@s.NameAr</a></td>
+                            <td class="num" data-v="@s.Verses">@F(s.Verses)</td>
+                            <td class="num" data-v="@s.Words">@F(s.Words)</td>
+                            <td class="num" data-v="@s.Letters">@F(s.Letters)</td>
+                            <td class="num" data-v="@s.AvgWordsPerVerse.ToString(System.Globalization.CultureInfo.InvariantCulture)">@F(s.AvgWordsPerVerse, "0.00")</td>
+                            <td class="num" data-v="@s.FirstPage">@s.FirstPage–@s.LastPage</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </section>
+}
+
+<section>
+    <h2>Exports</h2>
+    <p class="exports">
+        <a class="btn" href="/export/sourates.csv">Sourates (CSV)</a>
+        <a class="btn" href="/export/juz.csv">Juz (CSV)</a>
+        <a class="btn" href="/export/hizb.csv">Hizb (CSV)</a>
+        <a class="btn" href="/export/pages.csv">Pages (CSV)</a>
+        <a class="btn" href="/export/lettres.csv">Lettres (CSV)</a>
+        <a class="btn" href="/export/mots.csv">Mots (CSV)</a>
+    </p>
+</section>

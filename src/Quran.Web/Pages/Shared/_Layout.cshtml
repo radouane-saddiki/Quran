@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@(ViewData["Title"] is string t ? $"{t} · " : "")Coran Warsh</title>
+    <link rel="preload" href="~/fonts/warsh.10.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <header class="topbar">
+        <a class="brand" href="/">
+            <span class="brand-ar">القرآن الكريم</span>
+            <span class="brand-sub">Riwayat Warsh ʿan Nāfiʿ</span>
+        </a>
+        <nav class="nav">
+            <a href="/" class="@(ViewData["Nav"] as string == "lecture" ? "active" : "")">Lecture</a>
+            <a href="/Recherche" class="@(ViewData["Nav"] as string == "recherche" ? "active" : "")">Recherche</a>
+            <a href="/Statistiques" class="@(ViewData["Nav"] as string == "stats" ? "active" : "")">Statistiques</a>
+        </nav>
+    </header>
+
+    <main class="container">
+        @RenderBody()
+    </main>
+
+    <footer class="footer">
+        Texte : KFGQPC, riwayat Warsh ʿan Nāfiʿ (v2.1) · Police KFGQPC Warsh ·
+        <a href="https://github.com/radouane-saddiki/Quran">Code source</a>
+    </footer>
+
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

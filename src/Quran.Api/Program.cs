@@ -36,6 +36,7 @@ app.MapGet("/", () => Results.Ok(new
         "GET /api/surahs/{number}?includeVerses=true",
         "GET /api/surahs/{surah}/verses/{verse}",
         "GET /api/juz",
+        "GET /api/hizb",
         "GET /api/pages",
         "GET /api/extremes",
         "GET /api/frequencies/letters?form=NoDiacritics&surah=",
@@ -71,6 +72,7 @@ api.MapGet("/surahs/{surah:int}/verses/{verse:int}", (int surah, int verse, Qura
     {
         verse = s.ToRef(v),
         v.Juz,
+        v.Hizb,
         v.Page,
         v.PageEnd,
         words = v.Words.Select((w, i) => new { index = i + 1, w.Original, w.NoDiacritics, w.Normalized, letters = w.LetterCount }),
@@ -78,6 +80,8 @@ api.MapGet("/surahs/{surah:int}/verses/{verse:int}", (int surah, int verse, Qura
 });
 
 api.MapGet("/juz", (QuranStatistics s) => s.GetJuzStats());
+
+api.MapGet("/hizb", (QuranStatistics s) => s.GetHizbStats());
 
 api.MapGet("/pages", (QuranStatistics s) => s.GetPageStats());
 

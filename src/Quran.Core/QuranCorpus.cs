@@ -8,6 +8,8 @@ public sealed class QuranCorpus
 {
     public const string Riwaya = "Warsh ʿan Nāfiʿ";
     public const string Source = "KFGQPC Warsh Uthmanic v2.1 (via quran-center/quran-meta)";
+    /// <summary>La basmala, telle qu'écrite en Warsh (reprise de 27:30), affichée en tête des sourates sauf at-Tawba.</summary>
+    public const string Basmala = "بِسْمِ اِ۬للَّهِ اِ۬لرَّحْمَٰنِ اِ۬لرَّحِيمِ";
 
     public IReadOnlyList<Surah> Surahs { get; }
     public IReadOnlyList<Verse> Verses { get; }
@@ -16,6 +18,31 @@ public sealed class QuranCorpus
     {
         Surahs = surahs;
         Verses = surahs.SelectMany(s => s.Verses).ToArray();
+        AssignHizb();
+    }
+
+    public IEnumerable<Verse> VersesOfJuz(int juz) => Verses.Where(v => v.Juz == juz);
+    public IEnumerable<Verse> VersesOfHizb(int hizb) => Verses.Where(v => v.Hizb == hizb);
+    public IEnumerable<Verse> VersesOfPage(int page) => Verses.Where(v => v.Page <= page && v.PageEnd >= page);
+
+    /// <summary>Début de chaque hizb (id de verset), lu depuis la ressource warsh_hizb.json.</summary>
+    private void AssignHizb()
+    {
+        using var stream = typeof(QuranCorpus).Assembly.GetManifestResourceStream("Quran.Core.warsh_hizb.json");
+        if (stream is null) return;
+        var starts = JsonSerializer.Deserialize<List<HizbStart>>(stream)!.OrderBy(h => h.Id).ToArray();
+        var k = 0;
+        foreach (var v in Verses)
+        {
+            while (k + 1 < starts.Length && v.Id >= starts[k + 1].Id) k++;
+            v.Hizb = starts[k].Hizb;
+        }
+    }
+
+    private sealed class HizbStart
+    {
+        [JsonPropertyName("hizb")] public int Hizb { get; set; }
+        [JsonPropertyName("id")] public int Id { get; set; }
     }
 
     public Surah? GetSurah(int number) =>

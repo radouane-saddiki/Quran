@@ -1,0 +1,140 @@
+@page
+@model IndexModel
+@{
+    ViewData["Title"] = Model.Heading;
+    ViewData["Nav"] = "lecture";
+}
+
+<section class="toolbar" aria-label="Choisir le passage">
+    <form method="get" class="picker">
+        <input type="hidden" name="mode" value="sourate" />
+        @if (Model.Vue == "liste") { <input type="hidden" name="vue" value="liste" /> }
+        <label>Sourate
+            <select name="n" data-autosubmit>
+                @foreach (var s in Model.Corpus.Surahs)
+                {
+                    <option value="@s.Number" selected="@(Model.Mode == "sourate" && Model.N == s.Number)">@s.Number. @s.NameEn — @s.NameAr</option>
+                }
+            </select>
+        </label>
+    </form>
+    <form method="get" class="picker">
+        <input type="hidden" name="mode" value="juz" />
+        @if (Model.Vue == "liste") { <input type="hidden" name="vue" value="liste" /> }
+        <label>Juz
+            <select name="n" data-autosubmit>
+                @if (Model.Mode != "juz") { <option value="" selected>—</option> }
+                @for (var i = 1; i <= 30; i++)
+                {
+                    <option value="@i" selected="@(Model.Mode == "juz" && Model.N == i)">@i</option>
+                }
+            </select>
+        </label>
+    </form>
+    <form method="get" class="picker">
+        <input type="hidden" name="mode" value="hizb" />
+        @if (Model.Vue == "liste") { <input type="hidden" name="vue" value="liste" /> }
+        <label>Hizb
+            <select name="n" data-autosubmit>
+                @if (Model.Mode != "hizb") { <option value="" selected>—</option> }
+                @for (var i = 1; i <= 60; i++)
+                {
+                    <option value="@i" selected="@(Model.Mode == "hizb" && Model.N == i)">@i</option>
+                }
+            </select>
+        </label>
+    </form>
+    <form method="get" class="picker">
+        <input type="hidden" name="mode" value="page" />
+        @if (Model.Vue == "liste") { <input type="hidden" name="vue" value="liste" /> }
+        <label>Page
+            <input type="number" name="n" min="1" max="604" value="@(Model.Mode == "page" ? Model.N : null)" placeholder="1–604" />
+        </label>
+        <button type="submit">OK</button>
+    </form>
+    <form method="get" class="picker">
+        <label>Verset
+            <input type="text" name="aller" placeholder="ex. 2:253" size="7" value="@Model.Aller" />
+        </label>
+        <button type="submit">Aller</button>
+    </form>
+</section>
+
+@if (Model.Error is not null)
+{
+    <p class="alert">@Model.Error</p>
+}
+
+<section class="reader-head">
+    <div>
+        <h1>@Model.Heading</h1>
+        <p class="muted">@Model.SubHeading</p>
+    </div>
+    <div class="reader-tools">
+        <a class="btn" href="@Model.ToggleViewUrl()">@(Model.Vue == "liste" ? "Vue mushaf" : "Vue liste")</a>
+        <span class="size-ctl" role="group" aria-label="Taille du texte">
+            <button type="button" data-font="-1" title="Réduire le texte">A−</button>
+            <button type="button" data-font="1" title="Agrandir le texte">A+</button>
+        </span>
+    </div>
+</section>
+
+<nav class="pager">
+    @if (Model.N > 1)
+    {
+        <a class="btn" href="@Model.LinkTo(Model.Mode, Model.N - 1)">‹ Précédent</a>
+    }
+    else { <span></span> }
+    @if (Model.N < Model.Max)
+    {
+        <a class="btn" href="@Model.LinkTo(Model.Mode, Model.N + 1)">Suivant ›</a>
+    }
+</nav>
+
+<article class="reader @(Model.Vue == "liste" ? "reader-list" : "reader-flow")" id="reader">
+    @foreach (var (surah, verses) in Model.Segments)
+    {
+        @if (verses[0].Number == 1)
+        {
+            <header class="surah-head">
+                <div class="surah-title quran">سُورَةُ @surah.NameAr</div>
+                <div class="surah-meta">@surah.Number · @surah.NameEn · @surah.VerseCount versets</div>
+                @if (surah.Number != 9)
+                {
+                    <div class="basmala quran">@QuranCorpus.Basmala</div>
+                }
+            </header>
+        }
+        else if (Model.Mode != "sourate")
+        {
+            <div class="surah-cont">@surah.Number · @surah.NameEn — @surah.NameAr (suite)</div>
+        }
+
+        <div class="quran verses" dir="rtl" lang="ar">
+            @foreach (var v in verses)
+            {
+                var hl = Model.Hl == v.Reference;
+                <span class="aya @(hl ? "hl" : "") @(v.IsSajda ? "sajda" : "")" id="@IndexModel.Anchor(v)"
+                      title="@v.Reference · Juz @v.Juz · Hizb @v.Hizb · Page @v.Page@(v.IsSajda ? " · Sajda" : "")">
+                    @if (Model.Vue == "liste")
+                    {
+                        <a class="ref" href="@Model.LinkTo("sourate", v.Surah, v.Reference)" dir="ltr">@v.Reference</a>
+                    }
+                    @v.Text <span class="num">@v.NumberGlyph</span>
+                </span>
+            }
+        </div>
+    }
+</article>
+
+<nav class="pager">
+    @if (Model.N > 1)
+    {
+        <a class="btn" href="@Model.LinkTo(Model.Mode, Model.N - 1)">‹ Précédent</a>
+    }
+    else { <span></span> }
+    @if (Model.N < Model.Max)
+    {
+        <a class="btn" href="@Model.LinkTo(Model.Mode, Model.N + 1)">Suivant ›</a>
+    }
+</nav>
