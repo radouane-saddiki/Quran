@@ -78,8 +78,11 @@ public sealed class Loc(IHttpContextAccessor accessor)
     }];
 
     /// <summary>Textes du lecteur audio pour le JavaScript (attribut data-i18n).</summary>
-    public string PlayerJson() => JsonSerializer.Serialize(
-        Strings.Where(kv => kv.Key.StartsWith("pl.")).ToDictionary(kv => kv.Key[3..], kv => IsAr ? kv.Value.Ar : kv.Value.Fr));
+    public string PlayerJson() => ScriptJson("pl.");
+
+    /// <summary>Textes d'un script : clés commençant par le préfixe, sans le préfixe.</summary>
+    public string ScriptJson(string prefix) => JsonSerializer.Serialize(
+        Strings.Where(kv => kv.Key.StartsWith(prefix)).ToDictionary(kv => kv.Key[prefix.Length..], kv => IsAr ? kv.Value.Ar : kv.Value.Fr));
 
     private static readonly Dictionary<string, (string Ar, string Fr)> Strings = new()
     {
@@ -180,6 +183,56 @@ public sealed class Loc(IHttpContextAccessor accessor)
         ["form.normalized.short"] = ("موحَّدة", "normalisés"),
         ["form.nodiacritics.short"] = ("دون تشكيل", "sans diacritiques"),
         ["form.original.short"] = ("كما في النص", "texte exact"),
+
+        // ---------- Récitation (تسميع) ----------
+        ["nav.recite"] = ("التسميع", "Récitation"),
+        ["rec.title"] = ("التسميع", "Récitation corrigée"),
+        ["rec.intro"] = (
+            "اختر المقطع ثم اضغط «ابدأ» واقرأ من حفظك: النص مخفي، وتظهر كل كلمة عند قراءتها صحيحة، وتُعلَّم الأخطاء والكلمات المتروكة.",
+            "Choisissez le passage, appuyez sur « Commencer » et récitez de mémoire : le texte est masqué, chaque mot apparaît quand il est bien récité, les erreurs et oublis sont signalés."),
+        ["rec.from"] = ("من الآية", "Du verset"),
+        ["rec.to"] = ("إلى الآية", "au verset"),
+        ["rec.show"] = ("عرض", "Afficher"),
+        ["rec.engine"] = ("محرك التعرف", "Reconnaissance"),
+        ["rec.engine.browser"] = ("المتصفح (يحتاج إلى الإنترنت)", "Navigateur (Internet requis)"),
+        ["rec.engine.whisper"] = ("Whisper المحلي (دون إنترنت)", "Whisper local (hors ligne)"),
+        ["rec.start"] = ("🎙 ابدأ", "🎙 Commencer"),
+        ["rec.stop"] = ("⏹ توقف", "⏹ Arrêter"),
+        ["rec.hint"] = ("تلميح", "Indice"),
+        ["rec.hint.title"] = ("إظهار الكلمة التالية (تُحسب تلميحًا)", "Dévoiler le mot suivant (compté comme indice)"),
+        ["rec.peek"] = ("إظهار النص", "Voir le texte"),
+        ["rec.restart"] = ("إعادة", "Recommencer"),
+        ["rec.progress"] = ("التقدم", "Progression"),
+        ["rec.ok"] = ("صحيحة", "correctes"),
+        ["rec.wrong"] = ("خاطئة", "fausses"),
+        ["rec.missed"] = ("متروكة", "oubliées"),
+        ["rec.hints"] = ("تلميحات", "indices"),
+        ["rec.heard"] = ("المسموع", "Entendu"),
+        ["rec.results"] = ("النتيجة", "Résultat"),
+        ["rec.score"] = ("نسبة الصواب", "Taux de réussite"),
+        ["rec.mistakes"] = ("المواضع التي تحتاج إلى مراجعة", "Passages à revoir"),
+        ["rec.noMistakes"] = ("ما شاء الله، لا أخطاء.", "Aucune erreur, bravo."),
+        ["rec.col.verse"] = ("الآية", "Verset"),
+        ["rec.col.expected"] = ("الصواب", "Attendu"),
+        ["rec.col.heard"] = ("المسموع", "Entendu"),
+        ["rec.col.type"] = ("النوع", "Type"),
+        ["rec.listen"] = ("استماع", "Écouter"),
+        ["rec.legend"] = ("صحيحة · خاطئة · متروكة · تلميح", "correct · faux · oublié · indice"),
+        ["rec.whisper.missing"] = ("خادم Whisper غير مشغَّل على هذا الحاسوب (راجع tools/whisper-server). سيُستعمل المتصفح.", "Le serveur Whisper n'est pas lancé sur ce PC (voir tools/whisper-server). Le navigateur sera utilisé."),
+        ["rec.note"] = (
+            "التعرف الآلي على الصوت ليس معصومًا: قد يُعلَّم خطأ لم يقع. هذه أداة مساعدة على المراجعة ولا تغني عن التلقي من شيخ.",
+            "La reconnaissance vocale n'est pas infaillible : une erreur peut être signalée à tort. C'est une aide à la révision, qui ne remplace pas un enseignant."),
+        // Textes du script (attribut data-i18n)
+        ["js.listening"] = ("جارٍ الاستماع… اقرأ الآن", "À l'écoute… récitez"),
+        ["js.stopped"] = ("متوقف", "Arrêté"),
+        ["js.done"] = ("انتهى المقطع", "Passage terminé"),
+        ["js.noSupport"] = ("هذا المتصفح لا يدعم التعرف على الصوت. استعمل Chrome أو Edge، أو خادم Whisper المحلي.", "Ce navigateur ne gère pas la reconnaissance vocale. Utilisez Chrome ou Edge, ou le serveur Whisper local."),
+        ["js.micDenied"] = ("لم يُسمح باستعمال الميكروفون.", "Accès au micro refusé."),
+        ["js.error"] = ("خطأ: {0}", "Erreur : {0}"),
+        ["js.processing"] = ("جارٍ التحليل…", "Analyse…"),
+        ["js.type.wrong"] = ("خطأ", "faux"),
+        ["js.type.missed"] = ("متروكة", "oublié"),
+        ["js.type.hint"] = ("تلميح", "indice"),
 
         // ---------- Statistiques ----------
         ["stats.title"] = ("إحصاءات القرآن الكريم", "Statistiques du Coran"),

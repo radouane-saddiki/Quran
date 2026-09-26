@@ -1,0 +1,113 @@
+@page
+@model RecitationModel
+@{
+    ViewData["Title"] = L["rec.title"];
+    ViewData["Nav"] = "recitation";
+    var k = 0;
+}
+
+<h1>@L["rec.title"]</h1>
+<p class="muted">@L["rec.intro"]</p>
+
+<form method="get" class="toolbar">
+    <div class="picker">
+        <label>@L["surah"]
+            <select name="surah" id="rec-surah">
+                @foreach (var s in Model.Corpus.Surahs)
+                {
+                    <option value="@s.Number" data-count="@s.VerseCount" selected="@(Model.Surah == s.Number)">@L.SurahOption(s)</option>
+                }
+            </select>
+        </label>
+    </div>
+    <div class="picker">
+        <label>@L["rec.from"]
+            <input type="number" name="from" min="1" max="@Model.Current.VerseCount" value="@Model.From" dir="ltr" />
+        </label>
+        <label>@L["rec.to"]
+            <input type="number" name="to" min="1" max="@Model.Current.VerseCount" value="@Model.To" dir="ltr" />
+        </label>
+        <button type="submit">@L["rec.show"]</button>
+    </div>
+    <div class="picker">
+        <label>@L["rec.engine"]
+            <select id="rec-engine">
+                <option value="browser">@L["rec.engine.browser"]</option>
+                <option value="whisper">@L["rec.engine.whisper"]</option>
+            </select>
+        </label>
+    </div>
+</form>
+
+<section class="rec-bar" aria-live="polite">
+    <div class="rec-actions">
+        <button type="button" class="btn primary" id="rec-start" data-stop="@L["rec.stop"]">@L["rec.start"]</button>
+        <button type="button" class="btn" id="rec-hint" title="@L["rec.hint.title"]">@L["rec.hint"]</button>
+        <button type="button" class="btn" id="rec-peek" aria-pressed="false">@L["rec.peek"]</button>
+        <button type="button" class="btn" id="rec-restart">@L["rec.restart"]</button>
+    </div>
+    <div class="rec-meter">
+        <div class="rec-progress" role="progressbar" aria-label="@L["rec.progress"]" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="rec-bar"></span></div>
+        <div class="rec-counts">
+            <span class="c-ok"><b id="n-ok">0</b> @L["rec.ok"]</span>
+            <span class="c-wrong"><b id="n-wrong">0</b> @L["rec.wrong"]</span>
+            <span class="c-missed"><b id="n-missed">0</b> @L["rec.missed"]</span>
+            <span class="c-hint"><b id="n-hint">0</b> @L["rec.hints"]</span>
+        </div>
+    </div>
+    <div class="rec-status"><span id="rec-state" class="muted">—</span> <span class="rec-heard" id="rec-heard" dir="rtl" lang="ar"></span></div>
+</section>
+
+<article class="reader reader-flow rec-text masked" id="rec-text"
+         data-words="@Model.WordsJson()" data-i18n="@L.ScriptJson("js.")">
+    @if (Model.From == 1)
+    {
+        <header class="surah-head">
+            <div class="surah-title quran">سُورَةُ @Model.Current.NameAr</div>
+            @if (Model.Current.Number != 9)
+            {
+                <div class="basmala quran">@QuranCorpus.Basmala</div>
+            }
+        </header>
+    }
+    <div class="quran verses" dir="rtl" lang="ar">
+        @foreach (var v in Model.Verses)
+        {
+            <span class="aya" id="v@(v.Surah)-@(v.Number)">
+                @foreach (var w in v.Words)
+                {
+                    <span class="w" data-i="@(k++)">@w.Original</span>
+                    @(" ")
+                }
+                <span class="num">@v.NumberGlyph</span>
+            </span>
+        }
+    </div>
+</article>
+
+<section class="rec-summary" id="rec-summary" hidden>
+    <h2>@L["rec.results"]</h2>
+    <div class="tiles">
+        <div class="tile"><span class="tile-value" id="s-score">—</span><span class="tile-label">@L["rec.score"]</span></div>
+        <div class="tile"><span class="tile-value" id="s-ok">0</span><span class="tile-label">@L["rec.ok"]</span></div>
+        <div class="tile"><span class="tile-value" id="s-wrong">0</span><span class="tile-label">@L["rec.wrong"]</span></div>
+        <div class="tile"><span class="tile-value" id="s-missed">0</span><span class="tile-label">@L["rec.missed"]</span></div>
+        <div class="tile"><span class="tile-value" id="s-hint">0</span><span class="tile-label">@L["rec.hints"]</span></div>
+    </div>
+    <h3>@L["rec.mistakes"]</h3>
+    <p class="muted" id="s-none" hidden>@L["rec.noMistakes"]</p>
+    <div class="table-wrap">
+        <table class="data" id="s-table">
+            <thead><tr><th>@L["rec.col.verse"]</th><th>@L["rec.col.expected"]</th><th>@L["rec.col.heard"]</th><th>@L["rec.col.type"]</th><th></th></tr></thead>
+            <tbody></tbody>
+        </table>
+    </div>
+    <template id="s-listen"><a class="btn">@L["rec.listen"]</a></template>
+</section>
+
+<p class="hint">@L["rec.note"]</p>
+
+@section Scripts {
+    <script src="~/js/tasmee-align.js" asp-append-version="true"></script>
+    <script src="~/js/recitation.js" asp-append-version="true"></script>
+}

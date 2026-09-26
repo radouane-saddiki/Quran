@@ -69,6 +69,35 @@ En vue juz, hizb ou page, la lecture enchaîne les sourates du passage affiché.
 
 Le texte est affiché avec la police KFGQPC Warsh (`src/Quran.Web/wwwroot/fonts`), incluse : lecture, recherche et statistiques fonctionnent sans connexion Internet.
 
+#### Récitation corrigée (التسميع)
+
+Page **التسميع / Récitation** : choisir une sourate et une plage de versets, appuyer sur « ابدأ » et réciter de mémoire.
+Le texte est masqué ; chaque mot apparaît quand il est bien récité, les mots **faux** (rouge) et **oubliés** (orange)
+sont signalés, « تلميح » dévoile le mot suivant. À l'arrêt : taux de réussite et liste des passages à revoir,
+avec un lien pour écouter le verset.
+
+Deux moteurs de reconnaissance :
+
+| Moteur | Installation | Remarques |
+|---|---|---|
+| **Navigateur** (par défaut) | aucune | Chrome ou Edge ; reconnaissance vocale arabe de Google/Microsoft, connexion Internet nécessaire ; non spécialisée Coran |
+| **Whisper local** | Python 3.10+ | modèle [`tarteel-ai/whisper-base-ar-quran`](https://huggingface.co/tarteel-ai/whisper-base-ar-quran) affiné sur des récitations ; hors ligne, plus précis sur le Coran |
+
+Lancer le serveur Whisper (Windows, dans un second terminal, à laisser ouvert) :
+
+```powershell
+powershell -ExecutionPolicy Bypass -File tools\whisper-server\start.ps1
+```
+
+Le premier lancement crée `tools/whisper-server/.venv`, installe PyTorch et Transformers (1 à 2 Go) et télécharge le modèle
+(~300 Mo). Le site détecte ensuite le serveur (`http://127.0.0.1:5095`, réglable dans `appsettings.json`, section
+`Recitation`) et propose « Whisper local ». Modèle plus léger : ajouter `--model tarteel-ai/whisper-tiny-ar-quran`.
+
+La correction compare les mots après normalisation (sans voyelles, alifs et hamzas gommés) pour tolérer les écarts
+d'orthographe entre le texte Warsh et l'arabe standard que renvoie la reconnaissance (ex. « مالك » entendu = « مَلِكِ » écrit).
+Elle porte sur les **mots**, pas sur la prononciation fine (tajwīd, madd, imāla…) : c'est une aide à la mémorisation,
+qui peut se tromper.
+
 ### Lancer l'API en local
 
 Prérequis : SDK .NET 8 (`dotnet --list-sdks`).

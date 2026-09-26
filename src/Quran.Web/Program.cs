@@ -6,6 +6,7 @@ using Microsoft.Extensions.WebEncoders;
 using Quran.Core;
 using Quran.Web.Audio;
 using Quran.Web.Localization;
+using Quran.Web.Recitation;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,6 +29,8 @@ builder.Services.AddHttpClient("audio-download", c =>
     c.DefaultRequestHeaders.UserAgent.ParseAdd("QuranWarshWeb/1.0");
 });
 builder.Services.AddSingleton<LocalAudio>();
+builder.Services.Configure<RecitationOptions>(builder.Configuration.GetSection("Recitation"));
+builder.Services.AddHttpClient<WhisperClient>(c => c.Timeout = TimeSpan.FromSeconds(60));
 builder.Services.AddTransient<AudioDownloader>();
 
 var app = builder.Build();
@@ -103,6 +106,25 @@ app.MapGet("/audio/timings/{reciter}/{surah:int}", async (string reciter, int su
             statusCode: StatusCodes.Status502BadGateway);
     }
 });
+
+// ---------- Récitation : relais vers le serveur Whisper local (optionnel) ----------
+app.MapGet("/recitation/whisper", async (WhisperClient w, CancellationToken ct) =>
+    Results.Ok(new { available = await w.IsAvailableAsync(ct) }));
+
+app.MapPost("/recitation/transcribe", async (HttpRequest req, WhisperClient w, CancellationToken ct) =>
+{
+    if (req.ContentLength is null or 0 || req.ContentLength > WhisperClient.MaxAudioBytes)
+        return Results.BadRequest(new { error = "Audio absent ou trop long." });
+    try
+    {
+        var (status, json) = await w.TranscribeAsync(req.Body, ct);
+        return Results.Content(json, "application/json", Encoding.UTF8, status);
+    }
+    catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
+    {
+        return Results.Json(new { error = "Serveur Whisper injoignable.", detail = ex.Message }, statusCode: StatusCodes.Status502BadGateway);
+    }
+}).DisableAntiforgery();
 
 // ---------- Exports CSV (UTF-8 avec BOM pour Excel) ----------
 app.MapGet("/export/{name}.csv", (string name, QuranStatistics s) =>
