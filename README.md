@@ -81,7 +81,7 @@ Deux moteurs de reconnaissance :
 | Moteur | Installation | Remarques |
 |---|---|---|
 | **Navigateur** (par défaut) | aucune | Chrome ou Edge ; reconnaissance vocale arabe de Google/Microsoft, connexion Internet nécessaire ; non spécialisée Coran |
-| **Whisper local** | Python 3.10+ | modèle [`tarteel-ai/whisper-base-ar-quran`](https://huggingface.co/tarteel-ai/whisper-base-ar-quran) affiné sur des récitations ; hors ligne, plus précis sur le Coran |
+| **Whisper local** | Python 3.10+ | modèles Whisper sur votre PC, hors ligne ; avec une carte NVIDIA, le grand modèle `turbo` est choisi automatiquement |
 
 Lancer le serveur Whisper (Windows, dans un second terminal, à laisser ouvert) :
 
@@ -89,9 +89,21 @@ Lancer le serveur Whisper (Windows, dans un second terminal, à laisser ouvert) 
 powershell -ExecutionPolicy Bypass -File tools\whisper-server\start.ps1
 ```
 
-Le premier lancement crée `tools/whisper-server/.venv`, installe PyTorch et Transformers (1 à 2 Go) et télécharge le modèle
-(~300 Mo). Le site détecte ensuite le serveur (`http://127.0.0.1:5095`, réglable dans `appsettings.json`, section
-`Recitation`) et propose « Whisper local ». Modèle plus léger : ajouter `--model tarteel-ai/whisper-tiny-ar-quran`.
+Le premier lancement crée `tools/whisper-server/.venv` et installe PyTorch et Transformers. Si une carte **NVIDIA**
+est présente (commande `nvidia-smi`), le script installe la version CUDA de PyTorch pour utiliser la carte graphique.
+Le modèle est téléchargé au premier usage, puis fonctionne hors ligne. Le site détecte le serveur
+(`http://127.0.0.1:5095`, réglable dans `appsettings.json`, section `Recitation`) et affiche le modèle et GPU/CPU
+dans la liste des moteurs.
+
+| `--model` | Modèle | Taille | Remarques |
+|---|---|---|---|
+| `base` | [tarteel-ai/whisper-base-ar-quran](https://huggingface.co/tarteel-ai/whisper-base-ar-quran) | 74 M, ~300 Mo | affiné Coran ; défaut sans carte graphique |
+| `tiny` | [tarteel-ai/whisper-tiny-ar-quran](https://huggingface.co/tarteel-ai/whisper-tiny-ar-quran) | 39 M | plus léger, moins précis |
+| `turbo` | [openai/whisper-large-v3-turbo](https://huggingface.co/openai/whisper-large-v3-turbo) | 809 M, ~1,6 Go | multilingue, robuste ; défaut avec carte NVIDIA (~2 Go de mémoire graphique) |
+| `large` | [openai/whisper-large-v3](https://huggingface.co/openai/whisper-large-v3) | 1,55 G, ~3 Go | le plus précis, plus lent (~4 Go de mémoire graphique) |
+
+Exemple : `powershell -ExecutionPolicy Bypass -File tools\whisper-server\start.ps1 --model large`.
+Tous ces modèles sont gratuits (licences Apache 2.0 ou MIT).
 
 La correction compare les mots après normalisation (sans voyelles, alifs et hamzas gommés) pour tolérer les écarts
 d'orthographe entre le texte Warsh et l'arabe standard que renvoie la reconnaissance (ex. « مالك » entendu = « مَلِكِ » écrit).

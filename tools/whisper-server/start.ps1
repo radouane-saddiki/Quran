@@ -52,4 +52,24 @@ if (-not (Test-Path $venvPython)) {
     }
 }
 
+# Carte NVIDIA présente : il faut la version CUDA de PyTorch (celle de PyPI, sous Windows, n'utilise que le processeur).
+if (Get-Command nvidia-smi -ErrorAction SilentlyContinue) {
+    $cuda = & $venvPython -c "import torch; print(torch.cuda.is_available())" 2>$null
+    if ($cuda -ne "True") {
+        Write-Host "Carte NVIDIA détectée : installation de PyTorch pour CUDA (~2,5 Go, une seule fois)..."
+        $ok = $false
+        foreach ($cu in @("cu130", "cu129", "cu128", "cu126")) {
+            & $venvPython -m pip install --upgrade --force-reinstall torch --index-url "https://download.pytorch.org/whl/$cu"
+            if ($LASTEXITCODE -eq 0) {
+                $cuda = & $venvPython -c "import torch; print(torch.cuda.is_available())" 2>$null
+                if ($cuda -eq "True") { $ok = $true; Write-Host "PyTorch CUDA ($cu) installé."; break }
+            }
+        }
+        if (-not $ok) {
+            Write-Host "Impossible d'activer la carte graphique : le serveur utilisera le processeur." -ForegroundColor Yellow
+            Write-Host "Vérifiez que le pilote NVIDIA est à jour (commande nvidia-smi)."
+        }
+    }
+}
+
 & $venvPython server.py @args

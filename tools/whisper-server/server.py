@@ -1,14 +1,18 @@
 """
 Serveur local de reconnaissance de la récitation (mode تسميع du site Quran.Web).
 
-Modèle par défaut : tarteel-ai/whisper-base-ar-quran (Whisper affiné sur des récitations du Coran).
-Téléchargé automatiquement depuis Hugging Face au premier lancement, puis utilisable hors ligne.
+Modèles (téléchargés depuis Hugging Face au premier usage, puis utilisables hors ligne) :
+    base   tarteel-ai/whisper-base-ar-quran   74 M paramètres, affiné Coran (défaut sans carte graphique)
+    tiny   tarteel-ai/whisper-tiny-ar-quran   39 M, encore plus léger
+    turbo  openai/whisper-large-v3-turbo      809 M, multilingue, rapide sur GPU (défaut avec carte NVIDIA)
+    large  openai/whisper-large-v3            1,55 G, le plus précis, ~4 Go de mémoire graphique
+Tous sous licence libre (Apache 2.0 ou MIT).
 
-    python server.py                       # http://127.0.0.1:5095
-    python server.py --model tarteel-ai/whisper-tiny-ar-quran   # plus léger, moins précis
+    python server.py                    # choix automatique selon la présence d'un GPU
+    python server.py --model large      # alias ci-dessus ou nom complet Hugging Face
 
 Routes :
-    GET  /health       -> {"ok": true, "model": "..."}
+    GET  /health       -> {"ok": true, "model": "...", "device": "..."}
     POST /transcribe   corps = WAV mono PCM 16 bits  -> {"text": "..."}
 """
 import argparse
@@ -23,6 +27,13 @@ import numpy as np
 
 MAX_BYTES = 8 * 1024 * 1024
 SAMPLE_RATE = 16000
+
+MODELS = {
+    "tiny": "tarteel-ai/whisper-tiny-ar-quran",
+    "base": "tarteel-ai/whisper-base-ar-quran",
+    "turbo": "openai/whisper-large-v3-turbo",
+    "large": "openai/whisper-large-v3",
+}
 
 
 def read_wav(data: bytes) -> np.ndarray:
@@ -52,10 +63,25 @@ class Transcriber:
 
         if device == "auto":
             device = "cuda:0" if torch.cuda.is_available() else "cpu"
-        self.model = model
+        gpu = device.startswith("cuda")
+        if model == "auto":
+            model = "turbo" if gpu else "base"
+        model = MODELS.get(model, model)
+        self.model, self.device = model, device
         self.lock = threading.Lock()  # le modèle n'est pas prévu pour des appels simultanés
+
+        if gpu:
+            print(f"Carte graphique : {torch.cuda.get_device_name(0)}", flush=True)
+        elif model.startswith("openai/whisper-large"):
+            print("Attention : grand modèle sans carte graphique, chaque phrase prendra plusieurs secondes.", flush=True)
         print(f"Chargement de {model} sur {device}…", flush=True)
-        self.pipe = pipeline("automatic-speech-recognition", model=model, device=device)
+
+        # Demi-précision sur GPU : deux fois moins de mémoire, plus rapide, même qualité.
+        dtype = torch.float16 if gpu else torch.float32
+        try:
+            self.pipe = pipeline("automatic-speech-recognition", model=model, device=device, dtype=dtype)
+        except TypeError:  # anciennes versions de Transformers
+            self.pipe = pipeline("automatic-speech-recognition", model=model, device=device, torch_dtype=dtype)
 
         # Langue et tâche : les modèles Whisper récents les acceptent en paramètre ; les modèles affinés
         # plus anciens (dont tarteel-ai/whisper-*-ar-quran) ont une configuration de génération « ancienne »
@@ -113,7 +139,7 @@ def make_handler(engine: Transcriber):
 
         def do_GET(self):
             if self.path == "/health":
-                self._json(200, {"ok": True, "model": engine.model})
+                self._json(200, {"ok": True, "model": engine.model, "device": engine.device})
             else:
                 self._json(404, {"error": "not found"})
 
@@ -144,7 +170,7 @@ def make_handler(engine: Transcriber):
 
 def main():
     ap = argparse.ArgumentParser(description="Serveur Whisper pour le mode تسميع")
-    ap.add_argument("--model", default="tarteel-ai/whisper-base-ar-quran")
+    ap.add_argument("--model", default="auto", help="auto, tiny, base, turbo, large ou nom Hugging Face")
     ap.add_argument("--host", default="127.0.0.1")
     ap.add_argument("--port", type=int, default=5095)
     ap.add_argument("--device", default="auto", help="auto, cpu ou cuda:0")

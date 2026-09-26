@@ -16,18 +16,19 @@ public sealed class WhisperClient(HttpClient http, IOptions<RecitationOptions> o
 
     private string Base => options.Value.WhisperUrl.TrimEnd('/');
 
-    public async Task<bool> IsAvailableAsync(CancellationToken ct)
+    /// <summary>État du serveur Whisper : null s'il ne répond pas, sinon le JSON de /health (modèle, processeur ou GPU).</summary>
+    public async Task<string?> HealthAsync(CancellationToken ct)
     {
         try
         {
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
             cts.CancelAfter(TimeSpan.FromSeconds(2));
             using var resp = await http.GetAsync($"{Base}/health", cts.Token);
-            return resp.IsSuccessStatusCode;
+            return resp.IsSuccessStatusCode ? await resp.Content.ReadAsStringAsync(cts.Token) : null;
         }
         catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
         {
-            return false;
+            return null;
         }
     }
 

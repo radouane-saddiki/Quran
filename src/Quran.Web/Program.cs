@@ -109,7 +109,13 @@ app.MapGet("/audio/timings/{reciter}/{surah:int}", async (string reciter, int su
 
 // ---------- Récitation : relais vers le serveur Whisper local (optionnel) ----------
 app.MapGet("/recitation/whisper", async (WhisperClient w, CancellationToken ct) =>
-    Results.Ok(new { available = await w.IsAvailableAsync(ct) }));
+{
+    var health = await w.HealthAsync(ct);
+    if (health is null) return Results.Ok(new { available = false });
+    using var doc = System.Text.Json.JsonDocument.Parse(health);
+    string? Prop(string name) => doc.RootElement.TryGetProperty(name, out var v) ? v.GetString() : null;
+    return Results.Ok(new { available = true, model = Prop("model"), device = Prop("device") });
+});
 
 app.MapPost("/recitation/transcribe", async (HttpRequest req, WhisperClient w, CancellationToken ct) =>
 {

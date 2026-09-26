@@ -126,19 +126,31 @@
         const queue = [];
 
         this.start = async () => {
-            stream = await navigator.mediaDevices.getUserMedia({ audio: { channelCount: 1, echoCancellation: true, noiseSuppression: true } });
-            ctx = new (window.AudioContext || window.webkitAudioContext)();
+            // Pas de réduction de bruit : elle écrase les voyelles longues (madd) ; Whisper supporte bien le bruit de fond.
+            stream = await navigator.mediaDevices.getUserMedia({ audio: { channelCount: 1, echoCancellation: true, noiseSuppression: false, autoGainControl: true } });
+            // Contexte audio à 16 kHz : le navigateur rééchantillonne le micro proprement (filtre anti-repliement).
+            const AC = window.AudioContext || window.webkitAudioContext;
+            try { ctx = new AC({ sampleRate: RATE }); } catch { ctx = new AC(); }
             source = ctx.createMediaStreamSource(stream);
             node = ctx.createScriptProcessor(4096, 1, 1);
             const ratio = ctx.sampleRate / RATE;
             node.onaudioprocess = e => {
                 if (!active) return;
                 const input = e.inputBuffer.getChannelData(0);
-                // Sous-échantillonnage simple vers 16 kHz.
-                const out = new Float32Array(Math.floor(input.length / ratio));
+                // Si le navigateur n'a pas accepté 16 kHz : moyenne par blocs (filtre passe-bas simple)
+                // plutôt qu'un échantillon sur N, qui crée des distorsions (repliement).
+                const n = Math.floor(input.length / ratio);
+                const out = new Float32Array(n);
                 let rms = 0;
-                for (let i = 0; i < out.length; i++) {
-                    const v = input[Math.floor(i * ratio)];
+                for (let i = 0; i < n; i++) {
+                    let v;
+                    if (ratio === 1) v = input[i];
+                    else {
+                        const a = Math.floor(i * ratio), b = Math.max(a + 1, Math.floor((i + 1) * ratio));
+                        let sum = 0;
+                        for (let k = a; k < b; k++) sum += input[k];
+                        v = sum / (b - a);
+                    }
                     out[i] = v; rms += v * v;
                 }
                 rms = Math.sqrt(rms / Math.max(1, out.length));
@@ -296,6 +308,11 @@
     engineSel.addEventListener("change", () => store.set("quran.recEngine", engineSel.value));
     fetch("/recitation/whisper").then(r => r.json()).then(d => {
         const opt = engineSel.querySelector('option[value="whisper"]');
+        if (d.available && d.model) {
+            // Ex. « Whisper المحلي — whisper-large-v3-turbo · GPU »
+            const name = d.model.split("/").pop();
+            opt.textContent += ` — ${name} · ${(d.device || "").startsWith("cuda") ? "GPU" : "CPU"}`;
+        }
         if (!d.available) {
             opt.disabled = true;
             if (engineSel.value === "whisper") engineSel.value = "browser";
