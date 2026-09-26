@@ -1,0 +1,686 @@
+[
+ {
+  "sura_no": 1,
+  "name_ar": "الفَاتِحة",
+  "name_en": "Al-Fātiḥah",
+  "ayas": 7
+ },
+ {
+  "sura_no": 2,
+  "name_ar": "البَقَرَة",
+  "name_en": "Al-Baqarah",
+  "ayas": 285
+ },
+ {
+  "sura_no": 3,
+  "name_ar": "آل عِمران",
+  "name_en": "Āl-‘Imrān",
+  "ayas": 200
+ },
+ {
+  "sura_no": 4,
+  "name_ar": "النِّسَاء",
+  "name_en": "An-Nisā’",
+  "ayas": 175
+ },
+ {
+  "sura_no": 5,
+  "name_ar": "المَائدة",
+  "name_en": "Al-Mā’idah",
+  "ayas": 122
+ },
+ {
+  "sura_no": 6,
+  "name_ar": "الأنعَام",
+  "name_en": "Al-An‘ām",
+  "ayas": 167
+ },
+ {
+  "sura_no": 7,
+  "name_ar": "الأعرَاف",
+  "name_en": "Al-A‘rāf",
+  "ayas": 206
+ },
+ {
+  "sura_no": 8,
+  "name_ar": "الأنفَال",
+  "name_en": "Al-Anfāl",
+  "ayas": 76
+ },
+ {
+  "sura_no": 9,
+  "name_ar": "التوبَة",
+  "name_en": "At-Taubah",
+  "ayas": 130
+ },
+ {
+  "sura_no": 10,
+  "name_ar": "يُونس",
+  "name_en": "Yūnus",
+  "ayas": 109
+ },
+ {
+  "sura_no": 11,
+  "name_ar": "هُود",
+  "name_en": "Hūd",
+  "ayas": 121
+ },
+ {
+  "sura_no": 12,
+  "name_ar": "يُوسُف",
+  "name_en": "Yūsuf",
+  "ayas": 111
+ },
+ {
+  "sura_no": 13,
+  "name_ar": "الرَّعد",
+  "name_en": "Ar-Ra‘d",
+  "ayas": 44
+ },
+ {
+  "sura_no": 14,
+  "name_ar": "إبراهِيم",
+  "name_en": "Ibrāhīm",
+  "ayas": 54
+ },
+ {
+  "sura_no": 15,
+  "name_ar": "الحِجر",
+  "name_en": "Al-Ḥijr",
+  "ayas": 99
+ },
+ {
+  "sura_no": 16,
+  "name_ar": "النَّحل",
+  "name_en": "An-Naḥl",
+  "ayas": 128
+ },
+ {
+  "sura_no": 17,
+  "name_ar": "الإسرَاء",
+  "name_en": "Al-Isrā’",
+  "ayas": 110
+ },
+ {
+  "sura_no": 18,
+  "name_ar": "الكَهف",
+  "name_en": "Al-Kahf",
+  "ayas": 105
+ },
+ {
+  "sura_no": 19,
+  "name_ar": "مَريَم",
+  "name_en": "Maryam",
+  "ayas": 99
+ },
+ {
+  "sura_no": 20,
+  "name_ar": "طه",
+  "name_en": "Ṭā-Hā",
+  "ayas": 134
+ },
+ {
+  "sura_no": 21,
+  "name_ar": "الأنبيَاء",
+  "name_en": "Al-Anbiyā’",
+  "ayas": 111
+ },
+ {
+  "sura_no": 22,
+  "name_ar": "الحج",
+  "name_en": "Al-Ḥajj",
+  "ayas": 76
+ },
+ {
+  "sura_no": 23,
+  "name_ar": "المؤمنُون",
+  "name_en": "Al-Mu’minūn",
+  "ayas": 119
+ },
+ {
+  "sura_no": 24,
+  "name_ar": "النور",
+  "name_en": "An-Nūr",
+  "ayas": 62
+ },
+ {
+  "sura_no": 25,
+  "name_ar": "الفُرقَان",
+  "name_en": "Al-Furqān",
+  "ayas": 77
+ },
+ {
+  "sura_no": 26,
+  "name_ar": "الشعراء",
+  "name_en": "Ash-Shu‘arā’",
+  "ayas": 226
+ },
+ {
+  "sura_no": 27,
+  "name_ar": "النَّمل",
+  "name_en": "An-Naml",
+  "ayas": 95
+ },
+ {
+  "sura_no": 28,
+  "name_ar": "القَصَص",
+  "name_en": "Al-Qaṣaṣ",
+  "ayas": 88
+ },
+ {
+  "sura_no": 29,
+  "name_ar": "العَنكبُوت",
+  "name_en": "Al-‘Ankabūt",
+  "ayas": 69
+ },
+ {
+  "sura_no": 30,
+  "name_ar": "الرُّوم",
+  "name_en": "Ar-Rūm",
+  "ayas": 59
+ },
+ {
+  "sura_no": 31,
+  "name_ar": "لُقمَان",
+  "name_en": "Luqmān",
+  "ayas": 33
+ },
+ {
+  "sura_no": 32,
+  "name_ar": "السَّجدة",
+  "name_en": "As-Sajdah",
+  "ayas": 30
+ },
+ {
+  "sura_no": 33,
+  "name_ar": "الأحزَاب",
+  "name_en": "Al-Aḥzāb",
+  "ayas": 73
+ },
+ {
+  "sura_no": 34,
+  "name_ar": "سَبإ",
+  "name_en": "Saba’",
+  "ayas": 54
+ },
+ {
+  "sura_no": 35,
+  "name_ar": "فَاطِر",
+  "name_en": "Fāṭir",
+  "ayas": 46
+ },
+ {
+  "sura_no": 36,
+  "name_ar": "يسٓ",
+  "name_en": "Yā-Sīn",
+  "ayas": 82
+ },
+ {
+  "sura_no": 37,
+  "name_ar": "الصَّافَات",
+  "name_en": "Aṣ-Ṣāffāt",
+  "ayas": 182
+ },
+ {
+  "sura_no": 38,
+  "name_ar": "صٓ",
+  "name_en": "Ṣād",
+  "ayas": 86
+ },
+ {
+  "sura_no": 39,
+  "name_ar": "الزُّمَر",
+  "name_en": "Az-Zumar",
+  "ayas": 72
+ },
+ {
+  "sura_no": 40,
+  "name_ar": "غَافِر",
+  "name_en": "Ghāfir",
+  "ayas": 84
+ },
+ {
+  "sura_no": 41,
+  "name_ar": "فُصِّلَت",
+  "name_en": "Fuṣṣilat",
+  "ayas": 53
+ },
+ {
+  "sura_no": 42,
+  "name_ar": "الشُّوري",
+  "name_en": "Ash-Shūra",
+  "ayas": 50
+ },
+ {
+  "sura_no": 43,
+  "name_ar": "الزُّخرُف",
+  "name_en": "Az-Zukhruf",
+  "ayas": 89
+ },
+ {
+  "sura_no": 44,
+  "name_ar": "الدُّخان",
+  "name_en": "Ad-Dukhān",
+  "ayas": 56
+ },
+ {
+  "sura_no": 45,
+  "name_ar": "الجاثِية",
+  "name_en": "Al-Jāthiyah",
+  "ayas": 36
+ },
+ {
+  "sura_no": 46,
+  "name_ar": "الأحقَاف",
+  "name_en": "Al-Aḥqāf",
+  "ayas": 34
+ },
+ {
+  "sura_no": 47,
+  "name_ar": "مُحمد",
+  "name_en": "Muḥammad",
+  "ayas": 39
+ },
+ {
+  "sura_no": 48,
+  "name_ar": "الفَتح",
+  "name_en": "Al-Fatḥ",
+  "ayas": 29
+ },
+ {
+  "sura_no": 49,
+  "name_ar": "الحُجُرَات",
+  "name_en": "Al-Ḥujurāt",
+  "ayas": 18
+ },
+ {
+  "sura_no": 50,
+  "name_ar": "قٓ",
+  "name_en": "Qāf",
+  "ayas": 45
+ },
+ {
+  "sura_no": 51,
+  "name_ar": "الذَّاريَات",
+  "name_en": "Adh-Dhāriyāt",
+  "ayas": 60
+ },
+ {
+  "sura_no": 52,
+  "name_ar": "الطُّور",
+  "name_en": "Aṭ-Ṭūr",
+  "ayas": 47
+ },
+ {
+  "sura_no": 53,
+  "name_ar": "النَّجم",
+  "name_en": "An-Najm",
+  "ayas": 61
+ },
+ {
+  "sura_no": 54,
+  "name_ar": "القَمَر",
+  "name_en": "Al-Qamar",
+  "ayas": 55
+ },
+ {
+  "sura_no": 55,
+  "name_ar": "الرَّحمٰن",
+  "name_en": "Ar-Raḥmān",
+  "ayas": 77
+ },
+ {
+  "sura_no": 56,
+  "name_ar": "الوَاقِعة",
+  "name_en": "Al-Wāqi‘ah",
+  "ayas": 99
+ },
+ {
+  "sura_no": 57,
+  "name_ar": "الحدِيد",
+  "name_en": "Al-Ḥadīd",
+  "ayas": 28
+ },
+ {
+  "sura_no": 58,
+  "name_ar": "المُجَادلة",
+  "name_en": "Al-Mujādilah",
+  "ayas": 21
+ },
+ {
+  "sura_no": 59,
+  "name_ar": "الحَشر",
+  "name_en": "Al-Ḥashr",
+  "ayas": 24
+ },
+ {
+  "sura_no": 60,
+  "name_ar": "المُمتَحنَة",
+  "name_en": "Al-Mumtaḥanah",
+  "ayas": 13
+ },
+ {
+  "sura_no": 61,
+  "name_ar": "الصَّف",
+  "name_en": "Aṣ-Ṣaff",
+  "ayas": 14
+ },
+ {
+  "sura_no": 62,
+  "name_ar": "الجُمعَة",
+  "name_en": "Al-Jumu‘ah",
+  "ayas": 11
+ },
+ {
+  "sura_no": 63,
+  "name_ar": "المُنَافِقُونَ",
+  "name_en": "Al-Munāfiqūn",
+  "ayas": 11
+ },
+ {
+  "sura_no": 64,
+  "name_ar": "التغَابُن",
+  "name_en": "At-Taghābun",
+  "ayas": 18
+ },
+ {
+  "sura_no": 65,
+  "name_ar": "الطَّلَاق",
+  "name_en": "Aṭ-Ṭalāq",
+  "ayas": 12
+ },
+ {
+  "sura_no": 66,
+  "name_ar": "التَّحرِيم",
+  "name_en": "At-Taḥrīm",
+  "ayas": 12
+ },
+ {
+  "sura_no": 67,
+  "name_ar": "المُلك",
+  "name_en": "Al-Mulk",
+  "ayas": 31
+ },
+ {
+  "sura_no": 68,
+  "name_ar": "القَلَم",
+  "name_en": "Al-Qalam",
+  "ayas": 52
+ },
+ {
+  "sura_no": 69,
+  "name_ar": "الحَاقة",
+  "name_en": "Al-Ḥāqqah",
+  "ayas": 52
+ },
+ {
+  "sura_no": 70,
+  "name_ar": "المَعَارج",
+  "name_en": "Al-Ma‘ārij",
+  "ayas": 44
+ },
+ {
+  "sura_no": 71,
+  "name_ar": "نُوح",
+  "name_en": "Nūḥ",
+  "ayas": 30
+ },
+ {
+  "sura_no": 72,
+  "name_ar": "الجِن",
+  "name_en": "Al-Jinn",
+  "ayas": 28
+ },
+ {
+  "sura_no": 73,
+  "name_ar": "المُزمل",
+  "name_en": "Al-Muzzammil",
+  "ayas": 18
+ },
+ {
+  "sura_no": 74,
+  "name_ar": "المُدثر",
+  "name_en": "Al-Muddaththir",
+  "ayas": 55
+ },
+ {
+  "sura_no": 75,
+  "name_ar": "القِيَامة",
+  "name_en": "Al-Qiyāmah",
+  "ayas": 39
+ },
+ {
+  "sura_no": 76,
+  "name_ar": "الإنسَان",
+  "name_en": "Al-Insān",
+  "ayas": 31
+ },
+ {
+  "sura_no": 77,
+  "name_ar": "المُرسَلات",
+  "name_en": "Al-Mursalāt",
+  "ayas": 50
+ },
+ {
+  "sura_no": 78,
+  "name_ar": "النَّبَإ",
+  "name_en": "An-Naba’",
+  "ayas": 40
+ },
+ {
+  "sura_no": 79,
+  "name_ar": "النَّازعَات",
+  "name_en": "An-Nāzi‘āt",
+  "ayas": 45
+ },
+ {
+  "sura_no": 80,
+  "name_ar": "عَبَسَ",
+  "name_en": "‘Abasa",
+  "ayas": 42
+ },
+ {
+  "sura_no": 81,
+  "name_ar": "التَّكوير",
+  "name_en": "At-Takwīr",
+  "ayas": 29
+ },
+ {
+  "sura_no": 82,
+  "name_ar": "الانفِطَار",
+  "name_en": "Al-Infiṭār",
+  "ayas": 19
+ },
+ {
+  "sura_no": 83,
+  "name_ar": "المُطَففين",
+  "name_en": "Al-Muṭaffifīn",
+  "ayas": 36
+ },
+ {
+  "sura_no": 84,
+  "name_ar": "الانشِقَاق",
+  "name_en": "Al-Inshiqāq",
+  "ayas": 25
+ },
+ {
+  "sura_no": 85,
+  "name_ar": "البُرُوج",
+  "name_en": "Al-Burūj",
+  "ayas": 22
+ },
+ {
+  "sura_no": 86,
+  "name_ar": "الطَّارق",
+  "name_en": "Aṭ-Ṭāriq",
+  "ayas": 17
+ },
+ {
+  "sura_no": 87,
+  "name_ar": "الأعلى",
+  "name_en": "Al-A‘lā",
+  "ayas": 19
+ },
+ {
+  "sura_no": 88,
+  "name_ar": "الغَاشِية",
+  "name_en": "Al-Ghāshiyah",
+  "ayas": 26
+ },
+ {
+  "sura_no": 89,
+  "name_ar": "الفَجر",
+  "name_en": "Al-Fajr",
+  "ayas": 32
+ },
+ {
+  "sura_no": 90,
+  "name_ar": "البَلَد",
+  "name_en": "Al-Balad",
+  "ayas": 20
+ },
+ {
+  "sura_no": 91,
+  "name_ar": "الشَّمس",
+  "name_en": "Ash-Shams",
+  "ayas": 15
+ },
+ {
+  "sura_no": 92,
+  "name_ar": "اللَّيل",
+  "name_en": "Al-Lail",
+  "ayas": 21
+ },
+ {
+  "sura_no": 93,
+  "name_ar": "الضُّحى",
+  "name_en": "Aḍ-Ḍuḥā",
+  "ayas": 11
+ },
+ {
+  "sura_no": 94,
+  "name_ar": "الشَّرح",
+  "name_en": "Ash-Sharḥ",
+  "ayas": 8
+ },
+ {
+  "sura_no": 95,
+  "name_ar": "التِّين",
+  "name_en": "At-Tīn",
+  "ayas": 8
+ },
+ {
+  "sura_no": 96,
+  "name_ar": "العَلَق",
+  "name_en": "Al-‘Alaq",
+  "ayas": 20
+ },
+ {
+  "sura_no": 97,
+  "name_ar": "القَدر",
+  "name_en": "Al-Qadr",
+  "ayas": 5
+ },
+ {
+  "sura_no": 98,
+  "name_ar": "البَينَة",
+  "name_en": "Al-Bayyinah",
+  "ayas": 8
+ },
+ {
+  "sura_no": 99,
+  "name_ar": "الزَّلزَلة",
+  "name_en": "Az-Zalzalah",
+  "ayas": 9
+ },
+ {
+  "sura_no": 100,
+  "name_ar": "العَاديَات",
+  "name_en": "Al-‘Ādiyāt",
+  "ayas": 11
+ },
+ {
+  "sura_no": 101,
+  "name_ar": "القَارعَة",
+  "name_en": "Al-Qāri‘ah",
+  "ayas": 10
+ },
+ {
+  "sura_no": 102,
+  "name_ar": "التَّكاثُر",
+  "name_en": "At-Takāthur",
+  "ayas": 8
+ },
+ {
+  "sura_no": 103,
+  "name_ar": "العَصر",
+  "name_en": "Al-‘Aṣr",
+  "ayas": 3
+ },
+ {
+  "sura_no": 104,
+  "name_ar": "الهُمَزة",
+  "name_en": "Al-Humazah",
+  "ayas": 9
+ },
+ {
+  "sura_no": 105,
+  "name_ar": "الفِيل",
+  "name_en": "Al-Fīl",
+  "ayas": 5
+ },
+ {
+  "sura_no": 106,
+  "name_ar": "قُرَيش",
+  "name_en": "Quraish",
+  "ayas": 5
+ },
+ {
+  "sura_no": 107,
+  "name_ar": "المَاعُون",
+  "name_en": "Al-Mā‘ūn",
+  "ayas": 6
+ },
+ {
+  "sura_no": 108,
+  "name_ar": "الكَوثر",
+  "name_en": "Al-Kauthar",
+  "ayas": 3
+ },
+ {
+  "sura_no": 109,
+  "name_ar": "الكافِرون",
+  "name_en": "Al-Kāfirūn",
+  "ayas": 6
+ },
+ {
+  "sura_no": 110,
+  "name_ar": "النَّصر",
+  "name_en": "An-Naṣr",
+  "ayas": 3
+ },
+ {
+  "sura_no": 111,
+  "name_ar": "المَسَد",
+  "name_en": "Al-Masad",
+  "ayas": 5
+ },
+ {
+  "sura_no": 112,
+  "name_ar": "الإخلَاص",
+  "name_en": "Al-Ikhlāṣ",
+  "ayas": 4
+ },
+ {
+  "sura_no": 113,
+  "name_ar": "الفَلَق",
+  "name_en": "Al-Falaq",
+  "ayas": 5
+ },
+ {
+  "sura_no": 114,
+  "name_ar": "النَّاس",
+  "name_en": "An-Nās",
+  "ayas": 6
+ }
+]
