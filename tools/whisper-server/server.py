@@ -53,8 +53,18 @@ class Transcriber:
         self.lock = threading.Lock()  # le modèle n'est pas prévu pour des appels simultanés
         print(f"Chargement de {model} sur {device}…", flush=True)
         self.pipe = pipeline("automatic-speech-recognition", model=model, device=device)
-        self.generate_kwargs = {"language": "arabic", "task": "transcribe"}
-        # Premier appel « à vide » : charge tout en mémoire et vérifie les options de génération.
+
+        # Langue et tâche : les modèles Whisper récents les acceptent en paramètre ; les modèles affinés
+        # plus anciens (dont tarteel-ai/whisper-*-ar-quran) ont une configuration de génération « ancienne »
+        # (sans lang_to_id) qui fixe déjà l'arabe : leur passer language= provoque une erreur.
+        gen = self.pipe.model.generation_config
+        if getattr(gen, "lang_to_id", None):
+            self.generate_kwargs = {"language": "arabic", "task": "transcribe"}
+        else:
+            self.generate_kwargs = {}
+        print(f"Options de génération : {self.generate_kwargs or 'celles du modèle'}", flush=True)
+
+        # Premier appel « à vide » : charge tout en mémoire et vérifie que la transcription fonctionne.
         self.transcribe(np.zeros(SAMPLE_RATE // 2, dtype=np.float32))
         print("Modèle prêt.", flush=True)
 
@@ -62,14 +72,22 @@ class Transcriber:
         if len(audio) < SAMPLE_RATE // 4:
             return ""
         with self.lock:
-            inputs = {"raw": audio, "sampling_rate": SAMPLE_RATE}
             try:
-                out = self.pipe(inputs, generate_kwargs=self.generate_kwargs)
+                out = self._run(audio, self.generate_kwargs)
             except (ValueError, TypeError):
-                # Certains modèles affinés n'acceptent pas l'option de langue.
+                if not self.generate_kwargs:
+                    raise
+                # Option de langue refusée par ce modèle : on s'en passe désormais.
                 self.generate_kwargs = {}
-                out = self.pipe(inputs)
+                out = self._run(audio, {})
         return (out.get("text") or "").strip()
+
+    def _run(self, audio: np.ndarray, generate_kwargs: dict) -> dict:
+        # Dictionnaire neuf à chaque appel : le pipeline le modifie (il en retire la clé « raw »).
+        inputs = {"raw": audio, "sampling_rate": SAMPLE_RATE}
+        if generate_kwargs:
+            return self.pipe(inputs, generate_kwargs=generate_kwargs)
+        return self.pipe(inputs)
 
 
 def make_handler(engine: Transcriber):
