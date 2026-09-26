@@ -1,51 +1,48 @@
 @page
 @model RechercheModel
 @{
-    ViewData["Title"] = "Recherche";
+    ViewData["Title"] = L["search.title"];
     ViewData["Nav"] = "recherche";
     var r = Model.Result;
-    string N(int n) => n.ToString("N0", BarChart.Fr).Replace(' ', ' ').Replace(' ', ' ');
+    string N(int n) => L.N(n);
 }
 
-<h1>Recherche</h1>
+<h1>@L["search.title"]</h1>
 
 <form method="get" class="search-form">
     <div class="search-main">
-        <input type="search" name="q" value="@Model.Q" placeholder="ex. الله, رحم, بسم الله" dir="rtl" lang="ar" class="quran-input" autofocus aria-label="Mot ou expression" />
-        <button type="submit" class="primary">Rechercher</button>
+        <input type="search" name="q" value="@Model.Q" placeholder="@L["search.placeholder"]" dir="rtl" lang="ar" class="quran-input" autofocus aria-label="@L["search.aria"]" />
+        <button type="submit" class="primary">@L["search.submit"]</button>
     </div>
     <div class="search-options">
-        <label>Correspondance
+        <label>@L["search.match"]
             <select name="match">
-                @foreach (var (v, l) in RechercheModel.Matches)
+                @foreach (var v in RechercheModel.Matches)
                 {
-                    <option value="@v" selected="@(Model.Match == v)">@l</option>
+                    <option value="@v" selected="@(Model.Match == v)">@L.MatchLabel(v)</option>
                 }
             </select>
         </label>
-        <label>Forme du texte
+        <label>@L["search.form"]
             <select name="form">
-                @foreach (var (v, l) in RechercheModel.Forms)
+                @foreach (var v in RechercheModel.Forms)
                 {
-                    <option value="@v" selected="@(Model.Form == v)">@l</option>
+                    <option value="@v" selected="@(Model.Form == v)">@L.FormLabel(v)</option>
                 }
             </select>
         </label>
-        <label>Portée
+        <label>@L["scope"]
             <select name="surah">
-                <option value="">Tout le Coran</option>
+                <option value="">@L["whole"]</option>
                 @foreach (var s in Model.Corpus.Surahs)
                 {
-                    <option value="@s.Number" selected="@(Model.Surah == s.Number)">@s.Number. @s.NameEn — @s.NameAr</option>
+                    <option value="@s.Number" selected="@(Model.Surah == s.Number)">@L.SurahOption(s)</option>
                 }
             </select>
         </label>
     </div>
-    <p class="hint">
-        La requête est ramenée à la même forme que le texte : « <span class="ar">الله</span> » trouve « <span class="quran">اَ۬للَّهُ</span> ».
-        Plusieurs mots = expression (mots consécutifs). La recherche porte sur l'écriture, pas sur les racines :
-        utilisez « Commence par » ou « Contient » pour une famille de mots.
-    </p>
+    @* Textes de traduction statiques : l'insertion HTML est sûre. *@
+    <p class="hint">@Html.Raw(L.F("search.hint", "<span class=\"ar\">الله</span>", "<span class=\"quran\">اَ۬للَّهُ</span>"))</p>
 </form>
 
 @if (Model.Error is not null)
@@ -56,16 +53,16 @@
 @if (r is not null)
 {
     <section class="tiles">
-        <div class="tile"><span class="tile-value">@N(r.TotalOccurrences)</span><span class="tile-label">occurrences</span></div>
-        <div class="tile"><span class="tile-value">@N(r.VersesMatched)</span><span class="tile-label">versets</span></div>
-        <div class="tile"><span class="tile-value">@N(r.SurahsMatched)</span><span class="tile-label">sourates</span></div>
-        <div class="tile"><span class="tile-value ar" dir="rtl">@r.QueryInForm</span><span class="tile-label">forme cherchée</span></div>
+        <div class="tile"><span class="tile-value">@N(r.TotalOccurrences)</span><span class="tile-label">@L["search.occurrences"]</span></div>
+        <div class="tile"><span class="tile-value">@N(r.VersesMatched)</span><span class="tile-label">@L["search.verses"]</span></div>
+        <div class="tile"><span class="tile-value">@N(r.SurahsMatched)</span><span class="tile-label">@L["search.surahs"]</span></div>
+        <div class="tile"><span class="tile-value ar" dir="rtl">@r.QueryInForm</span><span class="tile-label">@L["search.searchedForm"]</span></div>
     </section>
 
     @if (Model.Surah is not null)
     {
         var s = Model.Corpus.GetSurah(Model.Surah.Value)!;
-        <p class="muted">Limité à la sourate @s.Number (@s.NameEn). <a href="@Model.QueryUrl(surah: null, page: 1)">Chercher dans tout le Coran</a></p>
+        <p class="muted">@L.F("search.limited", L.SurahName(s), s.Number) <a href="@Model.QueryUrl(surah: null, page: 1)">@L["search.everywhere"]</a></p>
     }
 
     @if (Model.Distribution is not null)
@@ -75,13 +72,12 @@
 
     @if (r.TotalOccurrences == 0)
     {
-        <p class="empty">Aucun résultat. Essayez « Commence par » ou « Contient », ou la forme « Normalisé ».</p>
+        <p class="empty">@L["search.none"]</p>
     }
     else
     {
         <p class="muted">
-            Occurrences @N((Model.PageNumber - 1) * RechercheModel.PageSize + 1)–@N(Math.Min(r.TotalOccurrences, Model.PageNumber * RechercheModel.PageSize))
-            sur @N(r.TotalOccurrences)
+            @L.F("search.range", (Model.PageNumber - 1) * RechercheModel.PageSize + 1, Math.Min(r.TotalOccurrences, Model.PageNumber * RechercheModel.PageSize), r.TotalOccurrences)
         </p>
         <ol class="results">
             @foreach (var (v, marks) in Model.Hits)
@@ -89,8 +85,8 @@
                 var surah = Model.Corpus.GetSurah(v.Surah)!;
                 <li>
                     <div class="result-ref">
-                        <a href="/?mode=sourate&n=@v.Surah&hl=@v.Reference#v@(v.Surah)-@(v.Number)">@v.Reference</a>
-                        <span class="muted">@surah.NameEn — @surah.NameAr · Juz @v.Juz · Hizb @v.Hizb · Page @v.Page</span>
+                        <a href="/?mode=sourate&n=@v.Surah&hl=@v.Reference#v@(v.Surah)-@(v.Number)" dir="ltr">@v.Reference</a>
+                        <span class="muted">@L.SurahName(surah) · @L["juz"] @v.Juz · @L["hizb"] @v.Hizb · @L["page"] @v.Page</span>
                     </div>
                     <p class="quran result-text" dir="rtl" lang="ar">
                         @for (var i = 0; i < v.Words.Count; i++)
@@ -116,13 +112,13 @@
             <nav class="pager">
                 @if (Model.PageNumber > 1)
                 {
-                    <a class="btn" href="@Model.QueryUrl(page: Model.PageNumber - 1)">‹ Précédent</a>
+                    <a class="btn" href="@Model.QueryUrl(page: Model.PageNumber - 1)">@L["prev"]</a>
                 }
                 else { <span></span> }
-                <span class="muted">Page @Model.PageNumber / @Model.PageCount</span>
+                <span class="muted">@L.F("search.page", Model.PageNumber, Model.PageCount)</span>
                 @if (Model.PageNumber < Model.PageCount)
                 {
-                    <a class="btn" href="@Model.QueryUrl(page: Model.PageNumber + 1)">Suivant ›</a>
+                    <a class="btn" href="@Model.QueryUrl(page: Model.PageNumber + 1)">@L["next"]</a>
                 }
                 else { <span></span> }
             </nav>

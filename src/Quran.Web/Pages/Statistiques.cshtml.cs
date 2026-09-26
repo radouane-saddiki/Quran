@@ -1,11 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Quran.Core;
+using Quran.Web.Localization;
 using Quran.Web.Models;
 
 namespace Quran.Web.Pages;
 
-public sealed class StatistiquesModel(QuranStatistics stats) : PageModel
+public sealed class StatistiquesModel(QuranStatistics stats, Loc L) : PageModel
 {
     public QuranCorpus Corpus => stats.Corpus;
     public QuranStatistics Stats => stats;
@@ -41,39 +42,39 @@ public sealed class StatistiquesModel(QuranStatistics stats) : PageModel
         var letters = stats.GetLetterFrequencies(TextForm.NoDiacritics, Surah);
         Letters = new BarChart
         {
-            Title = "Fréquence des lettres",
-            Subtitle = $"{Fmt(letters.Total)} lettres · diacritiques exclus",
+            Title = L["stats.chart.letters"],
+            Subtitle = L.F("stats.chart.letters.sub", letters.Total),
             Horizontal = true,
             ArabicLabels = true,
             Items = letters.Items.Select(i => new BarItem(i.Value, i.Count,
-                $"{i.Value} : {Fmt(i.Count)} ({i.Percent:0.00} %)")).ToList(),
+                $"{i.Value} : {L.N(i.Count)} ({L.N(i.Percent, "0.00")} %)")).ToList(),
         };
 
         if (Scope is null)
         {
             Charts.Add(new BarChart
             {
-                Title = "Versets par sourate",
-                Subtitle = "Cliquer une barre pour les statistiques de la sourate",
+                Title = L["stats.chart.versesBySurah"],
+                Subtitle = L["stats.chart.versesBySurah.sub"],
                 LabelEvery = 10,
                 Items = SurahTable.Select(s => new BarItem(s.Number.ToString(), s.Verses,
-                    $"{s.Number}. {s.NameEn} ({s.NameAr}) : {s.Verses} versets, {Fmt(s.Words)} mots",
+                    L.F("stats.chart.versesBySurah.tip", s.Number, L.SurahName(s.Number, s.NameAr, s.NameEn), s.Verses, s.Words),
                     $"/Statistiques?surah={s.Number}")).ToList(),
             });
             Charts.Add(new BarChart
             {
-                Title = "Mots par juz",
+                Title = L["stats.chart.wordsByJuz"],
                 LabelEvery = 1,
                 Items = stats.GetJuzStats().Select(g => new BarItem(g.Number.ToString(), g.Words,
-                    $"Juz {g.Number} ({g.From} → {g.To}) : {Fmt(g.Words)} mots, {g.Verses} versets",
+                    L.F("stats.chart.wordsByJuz.tip", g.Number, g.From, g.To, g.Words, g.Verses),
                     $"/?mode=juz&n={g.Number}")).ToList(),
             });
             Charts.Add(new BarChart
             {
-                Title = "Mots par hizb",
+                Title = L["stats.chart.wordsByHizb"],
                 LabelEvery = 5,
                 Items = stats.GetHizbStats().Select(g => new BarItem(g.Number.ToString(), g.Words,
-                    $"Hizb {g.Number} ({g.From} → {g.To}) : {Fmt(g.Words)} mots, {g.Verses} versets",
+                    L.F("stats.chart.wordsByHizb.tip", g.Number, g.From, g.To, g.Words, g.Verses),
                     $"/?mode=hizb&n={g.Number}")).ToList(),
             });
         }
@@ -84,10 +85,10 @@ public sealed class StatistiquesModel(QuranStatistics stats) : PageModel
             var n = Scope.VerseCount;
             Charts.Add(new BarChart
             {
-                Title = "Mots par verset",
+                Title = L["stats.chart.wordsByVerse"],
                 LabelEvery = n <= 30 ? 1 : n <= 120 ? 10 : 20,
                 Items = Scope.Verses.Select(v => new BarItem(v.Number.ToString(), v.WordCount,
-                    $"{v.Reference} : {v.WordCount} mots, {v.LetterCount} lettres",
+                    L.F("stats.chart.wordsByVerse.tip", v.Reference, v.WordCount, v.LetterCount),
                     $"/?mode=sourate&n={v.Surah}&hl={v.Reference}#v{v.Surah}-{v.Number}")).ToList(),
             });
         }
@@ -100,13 +101,6 @@ public sealed class StatistiquesModel(QuranStatistics stats) : PageModel
         if (s is not null) url += $"&surah={s}";
         return url;
     }
-
-    public static string FormLabel(TextForm f) => f switch
-    {
-        TextForm.Normalized => "normalisés",
-        TextForm.NoDiacritics => "sans diacritiques",
-        _ => "texte exact",
-    };
 
     public static string Fmt(double v, string f = "N0") =>
         v.ToString(f, BarChart.Fr).Replace(' ', ' ').Replace(' ', ' ');

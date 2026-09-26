@@ -1,11 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Quran.Core;
+using Quran.Web.Localization;
 using Quran.Web.Models;
 
 namespace Quran.Web.Pages;
 
-public sealed class RechercheModel(QuranStatistics stats) : PageModel
+public sealed class RechercheModel(QuranStatistics stats, Loc L) : PageModel
 {
     public const int PageSize = 50;
 
@@ -37,9 +38,9 @@ public sealed class RechercheModel(QuranStatistics stats) : PageModel
         {
             Result = stats.Search(Q, Match, Form, Surah, limit: PageSize, skip: (PageNumber - 1) * PageSize);
         }
-        catch (ArgumentException ex)
+        catch (ArgumentException)
         {
-            Error = ex.Message;
+            Error = L["search.noLetters"];
             return;
         }
 
@@ -61,13 +62,13 @@ public sealed class RechercheModel(QuranStatistics stats) : PageModel
             var counts = Result.BySurah.ToDictionary(b => b.Number, b => b.Value);
             Distribution = new BarChart
             {
-                Title = "Occurrences par sourate",
-                Subtitle = $"{Result.SurahsMatched} sourates sur 114 · cliquer une barre pour filtrer",
+                Title = L["search.chart.title"],
+                Subtitle = L.F("search.chart.sub", Result.SurahsMatched),
                 LabelEvery = 10,
                 Items = Corpus.Surahs.Select(s => new BarItem(
                     s.Number.ToString(),
                     counts.GetValueOrDefault(s.Number),
-                    $"{s.Number}. {s.NameEn} ({s.NameAr}) : {counts.GetValueOrDefault(s.Number)} occurrence(s)",
+                    L.F("search.chart.tip", s.Number, L.SurahName(s), counts.GetValueOrDefault(s.Number)),
                     counts.ContainsKey(s.Number) ? QueryUrl(surah: s.Number, page: 1) : null)).ToList(),
             };
         }
@@ -82,18 +83,7 @@ public sealed class RechercheModel(QuranStatistics stats) : PageModel
         return url;
     }
 
-    public static readonly (SearchMatch Value, string Label)[] Matches =
-    [
-        (SearchMatch.Exact, "Mot exact"),
-        (SearchMatch.StartsWith, "Commence par"),
-        (SearchMatch.EndsWith, "Se termine par"),
-        (SearchMatch.Contains, "Contient"),
-    ];
+    public static readonly SearchMatch[] Matches = [SearchMatch.Exact, SearchMatch.StartsWith, SearchMatch.EndsWith, SearchMatch.Contains];
 
-    public static readonly (TextForm Value, string Label)[] Forms =
-    [
-        (TextForm.Normalized, "Normalisé (alifs et yā' unifiés)"),
-        (TextForm.NoDiacritics, "Sans diacritiques"),
-        (TextForm.Original, "Texte exact (avec diacritiques)"),
-    ];
+    public static readonly TextForm[] Forms = [TextForm.Normalized, TextForm.NoDiacritics, TextForm.Original];
 }

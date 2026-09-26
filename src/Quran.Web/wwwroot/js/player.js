@@ -15,6 +15,11 @@
     const status = document.getElementById("pl-status");
     const listenBtn = document.getElementById("listen-btn");
 
+    // Textes traduits fournis par le serveur (arabe ou français).
+    let T = {};
+    try { T = JSON.parse(bar.dataset.i18n || "{}"); } catch { }
+    const tr = (k, ...a) => (T[k] ?? k).replace(/\{(\d+)\}/g, (_, i) => a[+i] ?? "");
+
     const verses = Array.from(document.querySelectorAll(".aya[data-s]"));
     if (verses.length === 0) return;
 
@@ -38,7 +43,7 @@
 
     function setPlaying(on) {
         btnPlay.textContent = on ? "⏸" : "▶";
-        btnPlay.setAttribute("aria-label", on ? "Pause" : "Lecture");
+        btnPlay.setAttribute("aria-label", on ? tr("pause") : tr("play"));
     }
 
     function markVerse(i, scroll) {
@@ -60,7 +65,7 @@
         const reciter = reciterSel.value;
         if (loaded && loaded.reciter === reciter && loaded.surah === surah) return loaded;
         loading = true;
-        setStatus(`Chargement de la sourate ${surah}…`);
+        setStatus(tr("loading", surah));
         try {
             const res = await fetch(`/audio/timings/${encodeURIComponent(reciter)}/${surah}`);
             const data = await res.json();
@@ -72,7 +77,7 @@
             return loaded;
         } catch (e) {
             loaded = null;
-            setStatus(`Audio indisponible : ${e.message}`);
+            setStatus(tr("unavailable", e.message));
             throw e;
         } finally {
             loading = false;
@@ -91,7 +96,7 @@
         const start = ayah === 1 || !t ? 0 : t.start / 1000;
         markVerse(i, true);
         if (audio.readyState >= 1) audio.currentTime = start; else seekTarget = start;
-        try { await audio.play(); } catch (e) { setStatus(`Lecture impossible : ${e.message}`); }
+        try { await audio.play(); } catch (e) { setStatus(tr("cannotPlay", e.message)); }
     }
 
     audio.addEventListener("loadedmetadata", () => {
@@ -100,7 +105,7 @@
     audio.addEventListener("play", () => setPlaying(true));
     audio.addEventListener("pause", () => setPlaying(false));
     audio.addEventListener("error", () => {
-        if (audio.src) setStatus("Fichier audio introuvable ou connexion interrompue.");
+        if (audio.src) setStatus(tr("fileError"));
         setPlaying(false);
     });
 
@@ -139,7 +144,7 @@
             playVerse(i + 1);
         } else {
             audio.pause();
-            setStatus("Fin du passage affiché. Utilisez « Suivant › » pour continuer.");
+            setStatus(tr("end"));
         }
     }
 
@@ -175,7 +180,7 @@
         audio.pause();
         loaded = null;
         if (i >= 0 && wasPlaying) playVerse(i);
-        else setStatus(`Récitateur : ${reciterName()}`);
+        else setStatus(tr("reciterSet", reciterName()));
     });
 
     // Barre d'espace = lecture/pause (hors champs de saisie).

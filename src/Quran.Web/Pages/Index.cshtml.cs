@@ -3,10 +3,11 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
 using Quran.Core;
 using Quran.Web.Audio;
+using Quran.Web.Localization;
 
 namespace Quran.Web.Pages;
 
-public sealed class IndexModel(QuranCorpus corpus, IOptions<AudioOptions> audio) : PageModel
+public sealed class IndexModel(QuranCorpus corpus, IOptions<AudioOptions> audio, Loc L) : PageModel
 {
     public QuranCorpus Corpus => corpus;
     public IReadOnlyList<Reciter> Reciters => audio.Value.Reciters;
@@ -62,13 +63,13 @@ public sealed class IndexModel(QuranCorpus corpus, IOptions<AudioOptions> audio)
         {
             case "sourate":
                 var s = corpus.GetSurah(N)!;
-                Heading = $"Sourate {s.Number} — {s.NameEn}";
-                SubHeading = $"{s.VerseCount} versets · pages {s.Verses[0].Page}–{s.Verses[^1].PageEnd}";
+                Heading = L.F("read.heading.surah", L.SurahName(s), s.Number);
+                SubHeading = L.F("read.sub.surah", s.VerseCount, s.Verses[0].Page, s.Verses[^1].PageEnd);
                 break;
             default:
-                var label = Mode switch { "juz" => "Juz", "hizb" => "Hizb", _ => "Page" };
+                var label = L[Mode switch { "juz" => "juz", "hizb" => "hizb", _ => "page" }];
                 Heading = $"{label} {N}";
-                SubHeading = $"{list.Count} versets · de {first.Reference} à {last.Reference}";
+                SubHeading = L.F("read.sub.range", list.Count, first.Reference, last.Reference);
                 break;
         }
     }
@@ -83,11 +84,11 @@ public sealed class IndexModel(QuranCorpus corpus, IOptions<AudioOptions> audio)
             if (parts.Length >= 2 && int.TryParse(parts[1], out var v) && corpus.GetVerse(s, v) is not null)
                 Hl = $"{s}:{v}";
             else if (parts.Length >= 2)
-                Error = $"Le verset {input} n'existe pas (la sourate {s} compte {corpus.GetSurah(s)!.VerseCount} versets en Warsh).";
+                Error = L.F("read.err.verse", input, s, corpus.GetSurah(s)!.VerseCount);
         }
         else
         {
-            Error = $"Référence « {input} » invalide. Exemple : 2:253.";
+            Error = L.F("read.err.ref", input);
         }
     }
 

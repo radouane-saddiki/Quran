@@ -40,6 +40,9 @@ dotnet run --project src/Quran.Web
 
 Dans Visual Studio 2022 : ouvrir `Quran.sln`, définir `Quran.Web` comme projet de démarrage, puis F5.
 
+Interface bilingue : **arabe par défaut** (de droite à gauche) et français, au choix via le lien en haut à droite
+(le choix est mémorisé dans un cookie). Les textes de l'interface sont dans `src/Quran.Web/Localization/Loc.cs`.
+
 | Page | Contenu |
 |---|---|
 | **Lecture** (`/`) | Affichage du texte par sourate, juz, hizb ou page du mushaf ; accès direct à un verset (`2:253`) ; vue mushaf ou vue liste ; taille du texte réglable |

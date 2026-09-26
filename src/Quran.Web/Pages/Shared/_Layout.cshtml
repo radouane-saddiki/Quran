@@ -1,22 +1,27 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="@L.Lang" dir="@L.Dir">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>@(ViewData["Title"] is string t ? $"{t} · " : "")Coran Warsh</title>
+    <title>@(ViewData["Title"] is string t ? $"{t} · " : "")@L["site.title"]</title>
     <link rel="preload" href="~/fonts/warsh.10.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
 <body>
+    @{
+        var here = Context.Request.Path + Context.Request.QueryString;
+        var nav = ViewData["Nav"] as string;
+    }
     <header class="topbar">
         <a class="brand" href="/">
-            <span class="brand-ar">القرآن الكريم</span>
-            <span class="brand-sub">Riwayat Warsh ʿan Nāfiʿ</span>
+            <span class="brand-ar">@L["site.brand"]</span>
+            <span class="brand-sub">@L["site.riwaya"]</span>
         </a>
         <nav class="nav">
-            <a href="/" class="@(ViewData["Nav"] as string == "lecture" ? "active" : "")">Lecture</a>
-            <a href="/Recherche" class="@(ViewData["Nav"] as string == "recherche" ? "active" : "")">Recherche</a>
-            <a href="/Statistiques" class="@(ViewData["Nav"] as string == "stats" ? "active" : "")">Statistiques</a>
+            <a href="/" class="@(nav == "lecture" ? "active" : "")">@L["nav.read"]</a>
+            <a href="/Recherche" class="@(nav == "recherche" ? "active" : "")">@L["nav.search"]</a>
+            <a href="/Statistiques" class="@(nav == "stats" ? "active" : "")">@L["nav.stats"]</a>
+            <a href="/langue/@L.Other?retour=@Uri.EscapeDataString(here)" class="lang-switch" lang="@L.Other" title="@L["lang.switch"]">@L.OtherLabel</a>
         </nav>
     </header>
 
@@ -25,8 +30,8 @@
     </main>
 
     <footer class="footer">
-        Texte : KFGQPC, riwayat Warsh ʿan Nāfiʿ (v2.1) · Police KFGQPC Warsh ·
-        <a href="https://github.com/radouane-saddiki/Quran">Code source</a>
+        @L["footer.text"] ·
+        <a href="https://github.com/radouane-saddiki/Quran">@L["footer.source"]</a>
     </footer>
 
     <script src="~/js/site.js" asp-append-version="true"></script>

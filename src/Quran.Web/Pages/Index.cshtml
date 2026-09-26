@@ -5,15 +5,16 @@
     ViewData["Nav"] = "lecture";
 }
 
-<section class="toolbar" aria-label="Choisir le passage">
+<section class="toolbar" aria-label="@L["read.choose"]">
     <form method="get" class="picker">
         <input type="hidden" name="mode" value="sourate" />
         @if (Model.Vue == "liste") { <input type="hidden" name="vue" value="liste" /> }
-        <label>Sourate
+        <label>@L["surah"]
             <select name="n" data-autosubmit>
+                @if (Model.Mode != "sourate") { <option value="" selected>—</option> }
                 @foreach (var s in Model.Corpus.Surahs)
                 {
-                    <option value="@s.Number" selected="@(Model.Mode == "sourate" && Model.N == s.Number)">@s.Number. @s.NameEn — @s.NameAr</option>
+                    <option value="@s.Number" selected="@(Model.Mode == "sourate" && Model.N == s.Number)">@L.SurahOption(s)</option>
                 }
             </select>
         </label>
@@ -21,7 +22,7 @@
     <form method="get" class="picker">
         <input type="hidden" name="mode" value="juz" />
         @if (Model.Vue == "liste") { <input type="hidden" name="vue" value="liste" /> }
-        <label>Juz
+        <label>@L["juz"]
             <select name="n" data-autosubmit>
                 @if (Model.Mode != "juz") { <option value="" selected>—</option> }
                 @for (var i = 1; i <= 30; i++)
@@ -34,7 +35,7 @@
     <form method="get" class="picker">
         <input type="hidden" name="mode" value="hizb" />
         @if (Model.Vue == "liste") { <input type="hidden" name="vue" value="liste" /> }
-        <label>Hizb
+        <label>@L["hizb"]
             <select name="n" data-autosubmit>
                 @if (Model.Mode != "hizb") { <option value="" selected>—</option> }
                 @for (var i = 1; i <= 60; i++)
@@ -47,16 +48,16 @@
     <form method="get" class="picker">
         <input type="hidden" name="mode" value="page" />
         @if (Model.Vue == "liste") { <input type="hidden" name="vue" value="liste" /> }
-        <label>Page
-            <input type="number" name="n" min="1" max="604" value="@(Model.Mode == "page" ? Model.N : null)" placeholder="1–604" />
+        <label>@L["page"]
+            <input type="number" name="n" min="1" max="604" value="@(Model.Mode == "page" ? Model.N : null)" placeholder="1–604" dir="ltr" />
         </label>
-        <button type="submit">OK</button>
+        <button type="submit">@L["read.ok"]</button>
     </form>
     <form method="get" class="picker">
-        <label>Verset
-            <input type="text" name="aller" placeholder="ex. 2:253" size="7" value="@Model.Aller" />
+        <label>@L["verse"]
+            <input type="text" name="aller" placeholder="@L["read.goto.placeholder"]" size="7" value="@Model.Aller" dir="ltr" />
         </label>
-        <button type="submit">Aller</button>
+        <button type="submit">@L["read.go"]</button>
     </form>
 </section>
 
@@ -73,12 +74,12 @@
     <div class="reader-tools">
         @if (Model.Reciters.Count > 0)
         {
-            <button type="button" class="btn primary" id="listen-btn" title="Écouter depuis le premier verset affiché">▶ Écouter</button>
+            <button type="button" class="btn primary" id="listen-btn" title="@L["read.listen.title"]">@L["read.listen"]</button>
         }
-        <a class="btn" href="@Model.ToggleViewUrl()">@(Model.Vue == "liste" ? "Vue mushaf" : "Vue liste")</a>
-        <span class="size-ctl" role="group" aria-label="Taille du texte">
-            <button type="button" data-font="-1" title="Réduire le texte">A−</button>
-            <button type="button" data-font="1" title="Agrandir le texte">A+</button>
+        <a class="btn" href="@Model.ToggleViewUrl()">@(Model.Vue == "liste" ? L["read.view.mushaf"] : L["read.view.list"])</a>
+        <span class="size-ctl" role="group" aria-label="@L["read.size"]">
+            <button type="button" data-font="-1" title="@L["read.smaller"]">A−</button>
+            <button type="button" data-font="1" title="@L["read.bigger"]">A+</button>
         </span>
     </div>
 </section>
@@ -86,12 +87,12 @@
 <nav class="pager">
     @if (Model.N > 1)
     {
-        <a class="btn" href="@Model.LinkTo(Model.Mode, Model.N - 1)">‹ Précédent</a>
+        <a class="btn" href="@Model.LinkTo(Model.Mode, Model.N - 1)">@L["prev"]</a>
     }
     else { <span></span> }
     @if (Model.N < Model.Max)
     {
-        <a class="btn" href="@Model.LinkTo(Model.Mode, Model.N + 1)">Suivant ›</a>
+        <a class="btn" href="@Model.LinkTo(Model.Mode, Model.N + 1)">@L["next"]</a>
     }
 </nav>
 
@@ -102,7 +103,7 @@
         {
             <header class="surah-head">
                 <div class="surah-title quran">سُورَةُ @surah.NameAr</div>
-                <div class="surah-meta">@surah.Number · @surah.NameEn · @surah.VerseCount versets</div>
+                <div class="surah-meta">@L.F("read.surah.meta", surah.Number, L.IsAr ? surah.NameEn : surah.NameAr, surah.VerseCount)</div>
                 @if (surah.Number != 9)
                 {
                     <div class="basmala quran">@QuranCorpus.Basmala</div>
@@ -111,20 +112,20 @@
         }
         else if (Model.Mode != "sourate")
         {
-            <div class="surah-cont">@surah.Number · @surah.NameEn — @surah.NameAr (suite)</div>
+            <div class="surah-cont">@surah.Number · @L.SurahName(surah) @L["read.cont"]</div>
         }
 
         <div class="quran verses" dir="rtl" lang="ar">
             @foreach (var v in verses)
             {
                 var hl = Model.Hl == v.Reference;
-                <span class="aya @(hl ? "hl" : "") @(v.IsSajda ? "sajda" : "")" id="@IndexModel.Anchor(v)" data-s="@v.Surah" data-v="@v.Number"
-                      title="@v.Reference · Juz @v.Juz · Hizb @v.Hizb · Page @v.Page@(v.IsSajda ? " · Sajda" : "")">
+                var title = L.F("read.verse.title", v.Reference, v.Juz, v.Hizb, v.Page) + (v.IsSajda ? " · " + L["read.sajda"] : "");
+                <span class="aya @(hl ? "hl" : "") @(v.IsSajda ? "sajda" : "")" id="@IndexModel.Anchor(v)" data-s="@v.Surah" data-v="@v.Number" title="@title">
                     @if (Model.Vue == "liste")
                     {
                         <a class="ref" href="@Model.LinkTo("sourate", v.Surah, v.Reference)" dir="ltr">@v.Reference</a>
                     }
-                    @v.Text <span class="num" role="button" tabindex="0" title="Écouter à partir du verset @v.Reference">@v.NumberGlyph</span>
+                    @v.Text <span class="num" role="button" tabindex="0" title="@L.F("read.listen.verse", v.Reference)">@v.NumberGlyph</span>
                 </span>
             }
         </div>
@@ -133,26 +134,26 @@
 
 @if (Model.Reciters.Count > 0)
 {
-    <div class="player" id="player" role="region" aria-label="Lecteur audio" hidden>
-        <select id="pl-reciter" aria-label="Récitateur">
+    <div class="player" id="player" role="region" aria-label="@L["pl.region"]" data-i18n="@L.PlayerJson()" hidden>
+        <select id="pl-reciter" aria-label="@L["pl.reciter"]">
             @foreach (var r in Model.Reciters)
             {
-                <option value="@r.Id">@r.Name — @r.NameAr</option>
+                <option value="@r.Id">@(L.IsAr ? r.NameAr : $"{r.Name} — {r.NameAr}")</option>
             }
         </select>
         <div class="pl-buttons">
-            <button type="button" id="pl-prev" title="Verset précédent" aria-label="Verset précédent">⏮</button>
-            <button type="button" id="pl-play" class="primary" title="Lecture / pause" aria-label="Lecture">▶</button>
-            <button type="button" id="pl-next" title="Verset suivant" aria-label="Verset suivant">⏭</button>
-            <button type="button" id="pl-repeat" title="Répéter le verset" aria-pressed="false">🔁</button>
-            <select id="pl-speed" aria-label="Vitesse" title="Vitesse">
-                <option value="0.75">0,75×</option>
+            <button type="button" id="pl-prev" title="@L["pl.prevVerse"]" aria-label="@L["pl.prevVerse"]">⏮</button>
+            <button type="button" id="pl-play" class="primary" title="@L["pl.playPause"]" aria-label="@L["pl.play"]">▶</button>
+            <button type="button" id="pl-next" title="@L["pl.nextVerse"]" aria-label="@L["pl.nextVerse"]">⏭</button>
+            <button type="button" id="pl-repeat" title="@L["pl.repeat"]" aria-label="@L["pl.repeat"]" aria-pressed="false">🔁</button>
+            <select id="pl-speed" aria-label="@L["pl.speed"]" title="@L["pl.speed"]">
+                <option value="0.75">0.75×</option>
                 <option value="1" selected>1×</option>
-                <option value="1.25">1,25×</option>
-                <option value="1.5">1,5×</option>
+                <option value="1.25">1.25×</option>
+                <option value="1.5">1.5×</option>
             </select>
         </div>
-        <span class="pl-status" id="pl-status" aria-live="polite">Touchez un numéro de verset pour écouter</span>
+        <span class="pl-status" id="pl-status" aria-live="polite">@L["pl.hint"]</span>
         <audio id="pl-audio" preload="none"></audio>
     </div>
 }
@@ -160,12 +161,12 @@
 <nav class="pager">
     @if (Model.N > 1)
     {
-        <a class="btn" href="@Model.LinkTo(Model.Mode, Model.N - 1)">‹ Précédent</a>
+        <a class="btn" href="@Model.LinkTo(Model.Mode, Model.N - 1)">@L["prev"]</a>
     }
     else { <span></span> }
     @if (Model.N < Model.Max)
     {
-        <a class="btn" href="@Model.LinkTo(Model.Mode, Model.N + 1)">Suivant ›</a>
+        <a class="btn" href="@Model.LinkTo(Model.Mode, Model.N + 1)">@L["next"]</a>
     }
 </nav>
 

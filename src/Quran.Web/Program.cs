@@ -1,11 +1,19 @@
 using System.Globalization;
 using System.Text;
+using System.Text.Encodings.Web;
+using System.Text.Unicode;
+using Microsoft.Extensions.WebEncoders;
 using Quran.Core;
 using Quran.Web.Audio;
+using Quran.Web.Localization;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddRazorPages();
+builder.Services.AddHttpContextAccessor();
+// Arabe écrit tel quel dans le HTML (et non en entités &#x...;) : pages bien plus légères.
+builder.Services.Configure<WebEncoderOptions>(o => o.TextEncoderSettings = new TextEncoderSettings(UnicodeRanges.All));
+builder.Services.AddScoped<Loc>();
 builder.Services.AddSingleton(_ => QuranCorpus.LoadEmbedded());
 builder.Services.AddSingleton<QuranStatistics>();
 builder.Services.Configure<AudioOptions>(builder.Configuration.GetSection("Audio"));
@@ -55,6 +63,21 @@ if (!app.Environment.IsDevelopment())
 app.UseStaticFiles();
 app.UseRouting();
 app.MapRazorPages();
+
+// ---------- Langue de l'interface (cookie, arabe par défaut) ----------
+app.MapGet("/langue/{code}", (string code, string? retour, HttpContext ctx) =>
+{
+    if (Loc.Supported.Contains(code))
+        ctx.Response.Cookies.Append(Loc.CookieName, code, new CookieOptions
+        {
+            Expires = DateTimeOffset.UtcNow.AddYears(1),
+            IsEssential = true,
+            SameSite = SameSiteMode.Lax,
+            HttpOnly = true,
+        });
+    var back = !string.IsNullOrEmpty(retour) && retour.StartsWith('/') && !retour.StartsWith("//") && !retour.StartsWith("/\\") ? retour : "/";
+    return Results.LocalRedirect(back);
+});
 
 // ---------- Audio ----------
 app.MapGet("/audio/reciters", (TimingService t, LocalAudio local) =>
