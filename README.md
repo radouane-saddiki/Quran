@@ -21,7 +21,7 @@ et une application .NET qui calcule des statistiques sur ce texte.
 
 ## Application .NET de statistiques
 
-Solution .NET 10 (`Quran.slnx`), sans aucun paquet NuGet externe :
+Solution **.NET 8** (`Quran.sln`), sans aucun paquet NuGet externe (fonctionne aussi avec un SDK plus récent) :
 
 | Projet | Rôle |
 |---|---|
@@ -29,12 +29,21 @@ Solution .NET 10 (`Quran.slnx`), sans aucun paquet NuGet externe :
 | `src/Quran.Api` | API web ASP.NET Core (minimal API) qui expose ces calculs en JSON |
 | `tools/Quran.Reports` | Outil console qui génère les rapports du dossier [`reports/`](reports/README.md) |
 
-### Lancer l'API
+### Lancer l'API en local
+
+Prérequis : SDK .NET 8 (`dotnet --list-sdks`).
 
 ```bash
+git clone https://github.com/radouane-saddiki/Quran.git
+cd Quran
 dotnet run --project src/Quran.Api
-# puis http://localhost:5080/  (liste des endpoints)
+# puis ouvrir http://localhost:5080/  (liste des endpoints)
 ```
+
+Ou ouvrir `Quran.sln` dans Visual Studio 2022, définir `Quran.Api` comme projet de démarrage et lancer (F5).
+
+Pour y accéder depuis un téléphone sur le même Wi-Fi : `dotnet run --project src/Quran.Api --urls http://0.0.0.0:5080`,
+autoriser le port 5080 dans le pare-feu Windows, puis ouvrir `http://<IP-du-PC>:5080/api/summary` (IP donnée par `ipconfig`).
 
 Exemples prêts à l'emploi dans `src/Quran.Api/Quran.Api.http` (Visual Studio, Rider ou VS Code REST Client).
 

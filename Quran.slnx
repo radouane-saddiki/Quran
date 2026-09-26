@@ -1,9 +1,0 @@
-<Solution>
-  <Folder Name="/src/">
-    <Project Path="src/Quran.Api/Quran.Api.csproj" />
-    <Project Path="src/Quran.Core/Quran.Core.csproj" />
-  </Folder>
-  <Folder Name="/tools/">
-    <Project Path="tools/Quran.Reports/Quran.Reports.csproj" />
-  </Folder>
-</Solution>
