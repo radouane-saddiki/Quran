@@ -14,6 +14,13 @@ builder.Services.AddHttpClient<TimingService>(c =>
     c.Timeout = TimeSpan.FromSeconds(30);
     c.DefaultRequestHeaders.UserAgent.ParseAdd("QuranWarshWeb/1.0");
 });
+builder.Services.AddHttpClient("audio-download", c =>
+{
+    c.Timeout = TimeSpan.FromMinutes(30);
+    c.DefaultRequestHeaders.UserAgent.ParseAdd("QuranWarshWeb/1.0");
+});
+builder.Services.AddSingleton<LocalAudio>();
+builder.Services.AddTransient<AudioDownloader>();
 
 var app = builder.Build();
 
@@ -28,6 +35,18 @@ if (args.Contains("--telecharger-minutages"))
     return;
 }
 
+// Option : « dotnet run --project src/Quran.Web -- --telecharger-audio [qazabri] [koshi] »
+// télécharge les MP3 dans wwwroot/audio/ (reprise possible), puis les minutages. Ensuite le site lit les fichiers locaux.
+if (args.Contains("--telecharger-audio"))
+{
+    var only = args.SkipWhile(a => a != "--telecharger-audio").Skip(1).TakeWhile(a => !a.StartsWith("--")).ToList();
+    var code = await app.Services.GetRequiredService<AudioDownloader>().RunAsync(only);
+    Console.WriteLine("\nMinutages :");
+    await PrefetchTimingsAsync(app.Services);
+    Environment.ExitCode = code;
+    return;
+}
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
@@ -38,10 +57,14 @@ app.UseRouting();
 app.MapRazorPages();
 
 // ---------- Audio ----------
-app.MapGet("/audio/reciters", (TimingService t) =>
-    t.Options.Reciters.Select(r => new { r.Id, r.Name, r.NameAr, audioUrl = r.AudioUrl }));
+app.MapGet("/audio/reciters", (TimingService t, LocalAudio local) =>
+    t.Options.Reciters.Select(r => new
+    {
+        r.Id, r.Name, r.NameAr, audioUrl = r.AudioUrl,
+        localSurahs = Enumerable.Range(1, 114).Count(s => local.Exists(r, s)),
+    }));
 
-app.MapGet("/audio/timings/{reciter}/{surah:int}", async (string reciter, int surah, TimingService t, CancellationToken ct) =>
+app.MapGet("/audio/timings/{reciter}/{surah:int}", async (string reciter, int surah, TimingService t, LocalAudio local, CancellationToken ct) =>
 {
     var r = t.Find(reciter);
     if (r is null) return Results.NotFound(new { error = $"Récitateur « {reciter} » inconnu." });
@@ -49,7 +72,7 @@ app.MapGet("/audio/timings/{reciter}/{surah:int}", async (string reciter, int su
     try
     {
         var timings = await t.GetAsync(r, surah, ct);
-        return Results.Ok(new { reciter = r.Id, surah, audio = r.AudioFor(surah), timings });
+        return Results.Ok(new { reciter = r.Id, surah, audio = local.UrlFor(r, surah), local = local.Exists(r, surah), timings });
     }
     catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or System.Text.Json.JsonException)
     {
@@ -106,7 +129,17 @@ static async Task PrefetchTimingsAsync(IServiceProvider services)
         var mismatches = 0;
         for (var s = 1; s <= 114; s++)
         {
-            var timings = await t.GetAsync(r, s);
+            IReadOnlyList<AyahTiming> timings;
+            try
+            {
+                timings = await t.GetAsync(r, s);
+            }
+            catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or System.Text.Json.JsonException)
+            {
+                Console.WriteLine($"  ! {r.Id} sourate {s} : minutages indisponibles ({ex.Message})");
+                mismatches++;
+                continue;
+            }
             var expected = corpus.GetSurah(s)!.VerseCount;
             if (timings.Count != expected)
             {

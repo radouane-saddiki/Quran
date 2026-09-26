@@ -53,17 +53,18 @@ Toucher un numéro de verset lance la récitation à partir de ce verset ; le ve
 Boutons verset précédent/suivant, répétition d'un verset, vitesse, barre d'espace = lecture/pause.
 En vue juz, hizb ou page, la lecture enchaîne les sourates du passage affiché.
 
-- Les fichiers audio sont lus directement sur les serveurs de [MP3Quran](https://mp3quran.net) (rien n'est stocké dans le dépôt) : connexion Internet nécessaire.
+- Par défaut, les fichiers audio sont lus sur les serveurs de [MP3Quran](https://mp3quran.net) (ils ne sont pas dans le dépôt : plusieurs Go).
 - Les minutages (début et fin de chaque verset, numérotation Warsh) viennent de l'API MP3Quran
   (`ayat_timing`, récitations n° 80 et 16). Ils sont téléchargés au premier usage de chaque sourate puis conservés dans
   `src/Quran.Web/App_Data/timings/`.
-- Pour tout télécharger d'avance et contrôler que le nombre de minutages correspond au nombre de versets :
-  `dotnet run --project src/Quran.Web -- --telecharger-minutages`
-- Récitateurs et adresses se règlent dans `src/Quran.Web/appsettings.json` (section `Audio`). Pour une écoute hors ligne,
-  placez les MP3 dans `src/Quran.Web/wwwroot/audio/<récitateur>/001.mp3…114.mp3` et remplacez `AudioUrl` par
-  `/audio/<récitateur>/{surah}.mp3`.
+- **Tout télécharger sur le PC** (MP3 + minutages, écoute hors ligne ensuite) :
+  `dotnet run --project src/Quran.Web -- --telecharger-audio`
+  (ou `--telecharger-audio koshi` pour un seul récitateur). Les MP3 vont dans `src/Quran.Web/wwwroot/audio/<récitateur>/`,
+  le site les utilise automatiquement quand ils sont présents. La commande reprend là où elle s'est arrêtée si on la relance.
+- Minutages seuls (avec contrôle du nombre de versets) : `dotnet run --project src/Quran.Web -- --telecharger-minutages`
+- Récitateurs et adresses se règlent dans `src/Quran.Web/appsettings.json` (section `Audio`).
 
-Le texte est affiché avec la police KFGQPC Warsh (`src/Quran.Web/wwwroot/fonts`), incluse : le site fonctionne sans connexion Internet.
+Le texte est affiché avec la police KFGQPC Warsh (`src/Quran.Web/wwwroot/fonts`), incluse : lecture, recherche et statistiques fonctionnent sans connexion Internet.
 
 ### Lancer l'API en local
 

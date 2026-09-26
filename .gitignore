@@ -3,3 +3,4 @@ obj/
 .vs/
 *.user
 src/Quran.Web/App_Data/
+src/Quran.Web/wwwroot/audio/
