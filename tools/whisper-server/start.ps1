@@ -58,7 +58,9 @@ if (-not (Test-Path $venvPython)) {
 # La version CUDA doit être compatible avec le pilote : « nvidia-smi » indique la version maximale qu'il accepte.
 function Test-Cuda {
     $ErrorActionPreference = "Continue"   # les avertissements de PyTorch (stderr) ne doivent pas arrêter le script
-    $r = & $venvPython -W ignore -c "import torch; print(torch.cuda.is_available())" 2>$null
+    # Vrai calcul sur la carte (et pas seulement is_available) : une carte trop ancienne pour une version
+    # de PyTorch peut être « disponible » mais sans code compatible (« no kernel image is available »).
+    $r = & $venvPython -W ignore -c "import torch; print(torch.cuda.is_available() and float((torch.ones(4, device='cuda') * 2).sum()) == 8.0)" 2>$null
     return ($r -eq "True")
 }
 
