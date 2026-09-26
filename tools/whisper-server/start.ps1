@@ -1,7 +1,9 @@
 ﻿# Lance le serveur Whisper local pour le mode تسميع (Windows PowerShell 5 ou 7).
 # Premier lancement : crée un environnement Python (.venv), installe les dépendances (1-2 Go)
 # puis télécharge le modèle. Les lancements suivants démarrent directement.
-$ErrorActionPreference = "Stop"
+# « Continue » : sous Windows PowerShell 5, un simple avertissement écrit par Python ou pip sur stderr
+# serait sinon traité comme une erreur fatale. Les échecs sont vérifiés explicitement ($LASTEXITCODE).
+$ErrorActionPreference = "Continue"
 Set-Location $PSScriptRoot
 
 $venvPython = Join-Path $PSScriptRoot ".venv\Scripts\python.exe"
@@ -53,21 +55,33 @@ if (-not (Test-Path $venvPython)) {
 }
 
 # Carte NVIDIA présente : il faut la version CUDA de PyTorch (celle de PyPI, sous Windows, n'utilise que le processeur).
-if (Get-Command nvidia-smi -ErrorAction SilentlyContinue) {
-    $cuda = & $venvPython -c "import torch; print(torch.cuda.is_available())" 2>$null
-    if ($cuda -ne "True") {
-        Write-Host "Carte NVIDIA détectée : installation de PyTorch pour CUDA (~2,5 Go, une seule fois)..."
-        $ok = $false
-        foreach ($cu in @("cu130", "cu129", "cu128", "cu126")) {
-            & $venvPython -m pip install --upgrade --force-reinstall torch --index-url "https://download.pytorch.org/whl/$cu"
-            if ($LASTEXITCODE -eq 0) {
-                $cuda = & $venvPython -c "import torch; print(torch.cuda.is_available())" 2>$null
-                if ($cuda -eq "True") { $ok = $true; Write-Host "PyTorch CUDA ($cu) installé."; break }
-            }
-        }
-        if (-not $ok) {
-            Write-Host "Impossible d'activer la carte graphique : le serveur utilisera le processeur." -ForegroundColor Yellow
-            Write-Host "Vérifiez que le pilote NVIDIA est à jour (commande nvidia-smi)."
+# La version CUDA doit être compatible avec le pilote : « nvidia-smi » indique la version maximale qu'il accepte.
+function Test-Cuda {
+    $ErrorActionPreference = "Continue"   # les avertissements de PyTorch (stderr) ne doivent pas arrêter le script
+    $r = & $venvPython -W ignore -c "import torch; print(torch.cuda.is_available())" 2>$null
+    return ($r -eq "True")
+}
+
+if ((Get-Command nvidia-smi -ErrorAction SilentlyContinue) -and -not (Test-Cuda)) {
+    $smi = (& nvidia-smi 2>$null) -join "`n"
+    $driverCuda = if ($smi -match "CUDA Version:\s*(\d+)\.(\d+)") { [double]("$($Matches[1]).$($Matches[2])") } else { 0 }
+    Write-Host "Carte NVIDIA détectée ; le pilote accepte CUDA jusqu'à $driverCuda."
+
+    # Versions de PyTorch CUDA disponibles, de la plus récente à la plus ancienne, limitées à ce que le pilote accepte.
+    $builds = @(@{ Tag = "cu130"; Cuda = 13.0 }, @{ Tag = "cu129"; Cuda = 12.9 }, @{ Tag = "cu128"; Cuda = 12.8 }, @{ Tag = "cu126"; Cuda = 12.6 }) |
+        Where-Object { $_.Cuda -le $driverCuda }
+
+    $ok = $false
+    foreach ($b in $builds) {
+        Write-Host "Installation de PyTorch $($b.Tag) (~2,5 Go, une seule fois)..."
+        & $venvPython -m pip install --upgrade --force-reinstall --no-deps torch --index-url "https://download.pytorch.org/whl/$($b.Tag)"
+        if ($LASTEXITCODE -eq 0 -and (Test-Cuda)) { $ok = $true; Write-Host "Carte graphique activée (PyTorch $($b.Tag))." -ForegroundColor Green; break }
+    }
+    if (-not $ok) {
+        Write-Host "La carte graphique n'a pas pu être activée : le serveur utilisera le processeur." -ForegroundColor Yellow
+        if ($driverCuda -lt 12.6) {
+            Write-Host "Votre pilote NVIDIA est trop ancien (CUDA $driverCuda). Mettez-le à jour depuis"
+            Write-Host "https://www.nvidia.com/Download/index.aspx puis relancez ce script."
         }
     }
 }
