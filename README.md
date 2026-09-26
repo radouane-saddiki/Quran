@@ -17,6 +17,7 @@ et une application .NET qui calcule des statistiques sur ce texte.
 | `data/warsh.csv` | CSV UTF-8 (avec BOM, s'ouvre directement dans Excel) |
 | `data/suras_warsh.json` | Index des 114 sourates avec leur nombre de versets en Warsh |
 | `data/warsh_hizb.json` | Début de chacun des 60 hizb (division maghrébine) |
+| `data/warsh_lines.json` | Découpage en lignes des 604 pages du mushaf (généré par `tools/mushaf-layout/layout.py`) |
 | `reports/` | Statistiques générées (Markdown, CSV, JSON) |
 | `src/`, `tools/` | Application .NET (voir ci-dessous) |
 
@@ -45,7 +46,7 @@ Interface bilingue : **arabe par défaut** (de droite à gauche) et français, a
 
 | Page | Contenu |
 |---|---|
-| **Lecture** (`/`) | Affichage du texte par sourate, juz, hizb ou page du mushaf ; accès direct à un verset (`2:253`) ; vue mushaf ou vue liste ; taille du texte réglable |
+| **Lecture** (`/`) | Affichage du texte par sourate, juz, hizb ou page du mushaf ; accès direct à un verset (`2:253`) ; **vue mushaf** (pages de 15 lignes comme le mushaf imprimé, deux pages côte à côte sur grand écran, flèches ← → pour tourner les pages) ou vue liste ; taille réglable |
 | **Recherche** (`/Recherche`) | Mot ou expression, mode (exact, commence par, se termine par, contient), forme du texte, limitation à une sourate ; répartition par sourate, résultats surlignés, pagination |
 | **Statistiques** (`/Statistiques`) | Chiffres clés, graphiques (versets par sourate, mots par juz et par hizb, fréquence des lettres), mots les plus fréquents, extrêmes, tableau triable des sourates, statistiques d'une sourate, exports CSV |
 
@@ -166,6 +167,18 @@ dotnet run --project tools/Quran.Reports -- reports
 Le texte utilise les signes spécifiques à Warsh (ex. `۬`) et encode les numéros de verset avec des
 caractères de la plage U+FC00–U+FDFF (`ﰀ` = 1, `ﰁ` = 2…), que seule la police KFGQPC Warsh affiche comme numéros :
 <https://cdn.jsdelivr.net/gh/thetruetruth/quran-data-kfgqpc@main/warsh/font/warsh.10.woff2>
+
+### Mise en page du mushaf
+
+Les données KFGQPC donnent la page et les lignes de début et de fin de chaque verset, mais pas l'endroit où un verset
+long passe à la ligne. `tools/mushaf-layout/layout.py` mesure la largeur réelle de chaque mot avec la police du mushaf
+(HarfBuzz) et choisit les coupures qui donnent des lignes régulières, en respectant exactement les lignes de chaque
+verset. Les coupures sont donc très proches du mushaf imprimé, sans être garanties mot pour mot.
+
+```bash
+pip install uharfbuzz fonttools brotli
+python tools/mushaf-layout/layout.py   # régénère data/warsh_lines.json (~1 min 30)
+```
 
 ## Source
 

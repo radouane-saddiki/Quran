@@ -7,7 +7,7 @@ using Quran.Web.Localization;
 
 namespace Quran.Web.Pages;
 
-public sealed class IndexModel(QuranCorpus corpus, IOptions<AudioOptions> audio, Loc L) : PageModel
+public sealed class IndexModel(QuranCorpus corpus, MushafLayout mushaf, IOptions<AudioOptions> audio, Loc L) : PageModel
 {
     public QuranCorpus Corpus => corpus;
     public IReadOnlyList<Reciter> Reciters => audio.Value.Reciters;
@@ -17,7 +17,7 @@ public sealed class IndexModel(QuranCorpus corpus, IOptions<AudioOptions> audio,
     [BindProperty(SupportsGet = true)] public int N { get; set; } = 1;
     /// <summary>Verset à mettre en évidence, ex. « 2:255 ».</summary>
     [BindProperty(SupportsGet = true)] public string? Hl { get; set; }
-    /// <summary>mushaf (texte continu) | liste (un verset par ligne)</summary>
+    /// <summary>mushaf (pages du mushaf, ligne par ligne) | liste (un verset par ligne)</summary>
     [BindProperty(SupportsGet = true)] public string Vue { get; set; } = "mushaf";
     /// <summary>Saisie « sourate:verset » pour aller directement à un verset.</summary>
     [BindProperty(SupportsGet = true)] public string? Aller { get; set; }
@@ -26,6 +26,11 @@ public sealed class IndexModel(QuranCorpus corpus, IOptions<AudioOptions> audio,
     public string SubHeading { get; private set; } = "";
     public IReadOnlyList<(Surah Surah, IReadOnlyList<Verse> Verses)> Segments { get; private set; } = [];
     public int Max { get; private set; }
+    /// <summary>Pages du mushaf à afficher (vue mushaf) : celles qui contiennent la sélection.</summary>
+    public IReadOnlyList<MushafPage> Pages { get; private set; } = [];
+    /// <summary>Versets sélectionnés ; les autres versets des pages affichées sont estompés.</summary>
+    public HashSet<int> Selected { get; private set; } = [];
+    public MushafLayout Mushaf => mushaf;
     public string? Error { get; private set; }
 
     public void OnGet()
@@ -59,6 +64,9 @@ public sealed class IndexModel(QuranCorpus corpus, IOptions<AudioOptions> audio,
 
         var first = list[0];
         var last = list[^1];
+        Selected = list.Select(v => v.Id).ToHashSet();
+        if (Vue == "mushaf")
+            Pages = Enumerable.Range(first.Page, last.PageEnd - first.Page + 1).Select(mushaf.GetPage).ToList();
         switch (Mode)
         {
             case "sourate":

@@ -17,6 +17,7 @@ builder.Services.Configure<WebEncoderOptions>(o => o.TextEncoderSettings = new T
 builder.Services.AddScoped<Loc>();
 builder.Services.AddSingleton(_ => QuranCorpus.LoadEmbedded());
 builder.Services.AddSingleton<QuranStatistics>();
+builder.Services.AddSingleton(sp => MushafLayout.LoadEmbedded(sp.GetRequiredService<QuranCorpus>()));
 builder.Services.Configure<AudioOptions>(builder.Configuration.GetSection("Audio"));
 builder.Services.AddHttpClient<TimingService>(c =>
 {
@@ -37,6 +38,7 @@ var app = builder.Build();
 
 // Chargement du texte au démarrage.
 app.Services.GetRequiredService<QuranStatistics>();
+app.Services.GetRequiredService<MushafLayout>();
 
 // Option : « dotnet run --project src/Quran.Web -- --telecharger-minutages »
 // télécharge tous les minutages (114 sourates × récitateurs) pour un usage hors ligne, puis quitte.

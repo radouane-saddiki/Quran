@@ -20,7 +20,15 @@
     try { T = JSON.parse(bar.dataset.i18n || "{}"); } catch { }
     const tr = (k, ...a) => (T[k] ?? k).replace(/\{(\d+)\}/g, (_, i) => a[+i] ?? "");
 
-    const verses = Array.from(document.querySelectorAll(".aya[data-s]"));
+    // En vue mushaf, un verset à cheval sur plusieurs lignes est découpé en plusieurs éléments .aya :
+    // on les regroupe (un verset = son premier élément ; « parts » donne tous ses morceaux).
+    const parts = new Map();
+    document.querySelectorAll(".aya[data-s]").forEach(el => {
+        const k = `${el.dataset.s}:${el.dataset.v}`;
+        if (!parts.has(k)) parts.set(k, []);
+        parts.get(k).push(el);
+    });
+    const verses = [...parts.values()].map(p => p[0]);
     if (verses.length === 0) return;
 
     const store = {
@@ -47,11 +55,11 @@
     }
 
     function markVerse(i, scroll) {
-        verses.forEach(v => v.classList.remove("playing"));
+        document.querySelectorAll(".aya.playing").forEach(v => v.classList.remove("playing"));
         index = i;
         if (i < 0) return;
         const el = verses[i];
-        el.classList.add("playing");
+        parts.get(key(el)).forEach(p => p.classList.add("playing"));
         setStatus(`${key(el)} · ${reciterName()}`);
         if (scroll) {
             const r = el.getBoundingClientRect();
@@ -150,7 +158,7 @@
 
     // Clic sur un numéro de verset : lecture à partir de ce verset.
     verses.forEach((el, i) => {
-        const num = el.querySelector(".num");
+        const num = parts.get(key(el)).map(p => p.querySelector(".num")).find(n => n);
         if (!num) return;
         const go = e => { e.preventDefault(); playVerse(i); };
         num.addEventListener("click", go);

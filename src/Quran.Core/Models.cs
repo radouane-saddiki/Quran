@@ -31,6 +31,10 @@ public sealed class Verse
     public required string Text { get; init; }
     public required IReadOnlyList<Word> Words { get; init; }
 
+    /// <summary>Le texte découpé sur les espaces, tel qu'affiché (signes ۞ compris) : base du découpage en lignes du mushaf.</summary>
+    public IReadOnlyList<string> DisplayWords => displayWords ??= Text.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries);
+    private string[]? displayWords;
+
     public int WordCount => Words.Count;
     public int LetterCount => Words.Sum(w => w.LetterCount);
     public string Reference => $"{Surah}:{Number}";

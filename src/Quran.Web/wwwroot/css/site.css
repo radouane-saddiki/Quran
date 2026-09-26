@@ -306,3 +306,52 @@ html[lang=fr] .lang-switch { font-family: var(--font-arabic); }
     .nav a { padding: .4rem .55rem; font-size: .92rem; }
     .lang-switch { margin-inline-start: 0; }
 }
+
+/* ---------- Mushaf : pages ligne par ligne ---------- */
+.mushaf {
+    display: flex; flex-wrap: wrap; justify-content: center; gap: 1.25rem;
+    direction: rtl;               /* page impaire à droite, comme un mushaf ouvert */
+}
+.mp {
+    flex: 0 1 calc(var(--qsize) * 18); min-width: 0;   /* A− / A+ changent la taille des pages */
+    background: var(--page, #fffdf6); color: var(--text);
+    border: 1px solid var(--border); border-radius: 6px;
+    box-shadow: 0 1px 3px rgb(0 0 0 / .06), inset 0 0 0 6px var(--page, #fffdf6), inset 0 0 0 7px var(--frame, #cdbf94);
+    padding: 1rem 1.4rem .6rem;
+    scroll-margin-top: 5rem;
+}
+.mp-head { display: flex; justify-content: space-between; align-items: baseline; gap: .5rem;
+    font-size: .8rem; color: var(--muted); border-bottom: 1px solid var(--frame, #cdbf94); padding-bottom: .15rem; margin-bottom: .35rem; }
+.mp-head .quran { font-size: 1.05rem; color: var(--text-2); }
+.mp-meta { color: var(--muted); }
+.mp-body { container-type: inline-size; }
+.ml {
+    /* Taille calculée pour qu'une ligne pleine occupe toute la largeur de la page. */
+    font-size: calc(100cqi / var(--mw) * var(--k, 1) * .975);
+    line-height: 2.05; height: calc(100cqi / var(--mw) * 2.05);
+    white-space: nowrap; overflow: visible;
+    text-align: justify; text-align-last: justify;
+}
+.ml-center { text-align: center; text-align-last: center; }
+.ml-title, .ml-basmala { text-align: center; text-align-last: center; display: flex; align-items: center; justify-content: center; }
+.ml-title span {
+    display: block; width: 100%;
+    font-size: calc(100cqi / var(--mw) * .9); line-height: 1.6;
+    border: 3px double var(--frame, #cdbf94); border-radius: 4px;
+    background: color-mix(in srgb, var(--frame, #cdbf94) 18%, transparent);
+}
+.ml-basmala { font-size: calc(100cqi / var(--mw)); }
+.mp-opening .mp-body { padding: 8% 12%; }
+.mp-opening .ml { text-align: center; text-align-last: center; }
+.mp-opening .ml:not(.ml-title) { font-size: calc(100cqi / var(--mw) * 1.3); height: calc(100cqi / var(--mw) * 2.6); }
+.mp-foot { text-align: center; font-size: .8rem; color: var(--muted); margin-top: .2rem; }
+.mushaf .aya { padding: 0; border-radius: 3px; }
+.mushaf .aya.out { opacity: .38; }
+.mushaf .num { color: var(--accent); }
+@media (prefers-color-scheme: dark) { :root { --page: #1c1b18; --frame: #5c5337; } }
+@media (max-width: 760px) {
+    .mp { padding: .7rem .6rem .4rem; box-shadow: none; }
+    .mushaf { gap: .75rem; }
+}
+.mushaf .aya.hl { box-shadow: none; }
+.mushaf .aya.playing { box-shadow: none; }

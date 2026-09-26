@@ -87,16 +87,18 @@
 <nav class="pager">
     @if (Model.N > 1)
     {
-        <a class="btn" href="@Model.LinkTo(Model.Mode, Model.N - 1)">@L["prev"]</a>
+        <a class="btn" rel="prev" href="@Model.LinkTo(Model.Mode, Model.N - 1)">@L["prev"]</a>
     }
     else { <span></span> }
     @if (Model.N < Model.Max)
     {
-        <a class="btn" href="@Model.LinkTo(Model.Mode, Model.N + 1)">@L["next"]</a>
+        <a class="btn" rel="next" href="@Model.LinkTo(Model.Mode, Model.N + 1)">@L["next"]</a>
     }
 </nav>
 
-<article class="reader @(Model.Vue == "liste" ? "reader-list" : "reader-flow")" id="reader">
+@if (Model.Vue == "liste")
+{
+<article class="reader reader-list" id="reader">
     @foreach (var (surah, verses) in Model.Segments)
     {
         @if (verses[0].Number == 1)
@@ -121,16 +123,66 @@
                 var hl = Model.Hl == v.Reference;
                 var title = L.F("read.verse.title", v.Reference, v.Juz, v.Hizb, v.Page) + (v.IsSajda ? " · " + L["read.sajda"] : "");
                 <span class="aya @(hl ? "hl" : "") @(v.IsSajda ? "sajda" : "")" id="@IndexModel.Anchor(v)" data-s="@v.Surah" data-v="@v.Number" title="@title">
-                    @if (Model.Vue == "liste")
-                    {
-                        <a class="ref" href="@Model.LinkTo("sourate", v.Surah, v.Reference)" dir="ltr">@v.Reference</a>
-                    }
+                    <a class="ref" href="@Model.LinkTo("sourate", v.Surah, v.Reference)" dir="ltr">@v.Reference</a>
                     @v.Text <span class="num" role="button" tabindex="0" title="@L.F("read.listen.verse", v.Reference)">@v.NumberGlyph</span>
                 </span>
             }
         </div>
     }
 </article>
+}
+else
+{
+<article class="mushaf" id="reader" style="--mw:@Model.Mushaf.Width.ToString(System.Globalization.CultureInfo.InvariantCulture)">
+    @foreach (var pg in Model.Pages)
+    {
+        var fv = pg.FirstVerse;
+        var surahOfPage = Model.Corpus.GetSurah(fv.Surah)!;
+        <section class="mp @(pg.Number <= 2 ? "mp-opening" : "")" id="p@(pg.Number)" dir="rtl" lang="ar" aria-label="@L["page"] @pg.Number">
+            <header class="mp-head">
+                <span class="quran">سُورَةُ @surahOfPage.NameAr</span>
+                <a href="/?mode=page&n=@pg.Number" class="mp-meta">@L["hizb"] @L.N(fv.Hizb) · @L["juz"] @L.N(fv.Juz)</a>
+            </header>
+            <div class="mp-body">
+                @foreach (var line in pg.Lines)
+                {
+                    switch (line.Kind)
+                    {
+                        case Quran.Core.MushafLineKind.SurahTitle:
+                            <div class="ml ml-title"><span class="quran">سُورَةُ @line.Surah!.NameAr</span></div>
+                            break;
+                        case Quran.Core.MushafLineKind.Basmala:
+                            <div class="ml ml-basmala quran">@QuranCorpus.Basmala</div>
+                            break;
+                        default:
+                            var k = line.Fill > 1 ? 1 / line.Fill : 1;
+                            var cls = line.Fill == 0 ? "ml-center" : line.Fill < 0.72 ? "ml-center" : "";
+                            <div class="ml quran @cls" style="@(k < 1 ? $"--k:{k.ToString("0.###", System.Globalization.CultureInfo.InvariantCulture)}" : null)">
+                                @foreach (var piece in line.Pieces)
+                                {
+                                    var v = piece.Verse;
+                                    var inSel = Model.Selected.Contains(v.Id);
+                                    var hl = inSel && Model.Hl == v.Reference;
+                                    var title = L.F("read.verse.title", v.Reference, v.Juz, v.Hizb, v.Page) + (v.IsSajda ? " · " + L["read.sajda"] : "");
+                                    if (inSel)
+                                    {
+                                        <span class="aya @(hl ? "hl" : "") @(v.IsSajda ? "sajda" : "")" id="@(piece.FirstWord == 0 ? IndexModel.Anchor(v) : null)" data-s="@v.Surah" data-v="@v.Number" title="@title">@string.Join(" ", piece.Words)@if (piece.IsVerseEnd) {<text> </text><span class="num" role="button" tabindex="0" title="@L.F("read.listen.verse", v.Reference)">@v.NumberGlyph</span>}</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="aya out" title="@title">@string.Join(" ", piece.Words)@if (piece.IsVerseEnd) {<text> </text><span class="num">@v.NumberGlyph</span>}</span>
+                                    }
+                                }
+                            </div>
+                            break;
+                    }
+                }
+            </div>
+            <footer class="mp-foot">@L.N(pg.Number)</footer>
+        </section>
+    }
+</article>
+}
 
 @if (Model.Reciters.Count > 0)
 {
@@ -161,15 +213,24 @@
 <nav class="pager">
     @if (Model.N > 1)
     {
-        <a class="btn" href="@Model.LinkTo(Model.Mode, Model.N - 1)">@L["prev"]</a>
+        <a class="btn" rel="prev" href="@Model.LinkTo(Model.Mode, Model.N - 1)">@L["prev"]</a>
     }
     else { <span></span> }
     @if (Model.N < Model.Max)
     {
-        <a class="btn" href="@Model.LinkTo(Model.Mode, Model.N + 1)">@L["next"]</a>
+        <a class="btn" rel="next" href="@Model.LinkTo(Model.Mode, Model.N + 1)">@L["next"]</a>
     }
 </nav>
 
 @section Scripts {
     <script src="~/js/player.js" asp-append-version="true"></script>
+    <script>
+        // Flèches du clavier : on tourne les pages comme dans un mushaf (← page suivante, → page précédente).
+        document.addEventListener("keydown", e => {
+            if (e.altKey || e.ctrlKey || e.metaKey || e.target.closest("input, select, textarea")) return;
+            const rel = e.key === "ArrowLeft" ? "next" : e.key === "ArrowRight" ? "prev" : null;
+            const a = rel && document.querySelector(`.pager a[rel=${rel}]`);
+            if (a) location.href = a.href;
+        });
+    </script>
 }
