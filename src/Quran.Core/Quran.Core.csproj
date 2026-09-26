@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>Quran.Core</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Texte Warsh (KFGQPC v2.1) embarqué dans l'assembly -->
+    <EmbeddedResource Include="..\..\data\warsh_kfgqpc_v2-1.json" LogicalName="Quran.Core.warsh.json" />
+  </ItemGroup>
+</Project>

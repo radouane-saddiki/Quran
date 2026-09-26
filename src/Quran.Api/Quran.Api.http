@@ -1,0 +1,33 @@
+@host = http://localhost:5080
+
+GET {{host}}/api/summary
+
+###
+GET {{host}}/api/surahs
+
+###
+GET {{host}}/api/surahs/1
+
+###
+GET {{host}}/api/surahs/2/verses/253
+
+###
+GET {{host}}/api/extremes
+
+###
+GET {{host}}/api/frequencies/letters
+
+###
+GET {{host}}/api/frequencies/words?top=50&minLetters=3
+
+###
+# Occurrences du mot « الله » (toutes formes normalisées)
+GET {{host}}/api/search?q=الله&match=Exact
+
+###
+# Mots commençant par « رحم »
+GET {{host}}/api/search?q=رحم&match=StartsWith&limit=20
+
+###
+# Expression de plusieurs mots
+GET {{host}}/api/search?q=بسم الله
