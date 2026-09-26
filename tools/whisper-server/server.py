@@ -46,6 +46,9 @@ class Transcriber:
     def __init__(self, model: str, device: str):
         import torch
         from transformers import pipeline
+        from transformers.utils import logging as hf_logging
+
+        hf_logging.set_verbosity_error()  # masque les avertissements sans conséquence (dépréciations…)
 
         if device == "auto":
             device = "cuda:0" if torch.cuda.is_available() else "cpu"
@@ -64,30 +67,38 @@ class Transcriber:
             self.generate_kwargs = {}
         print(f"Options de génération : {self.generate_kwargs or 'celles du modèle'}", flush=True)
 
-        # Premier appel « à vide » : charge tout en mémoire et vérifie que la transcription fonctionne.
-        self.transcribe(np.zeros(SAMPLE_RATE // 2, dtype=np.float32))
-        print("Modèle prêt.", flush=True)
+        # Premier appel court (1 s de son de test, 8 jetons max) : charge tout en mémoire et vérifie que tout fonctionne.
+        print("Test du modèle (quelques secondes)…", flush=True)
+        t0 = time.perf_counter()
+        tone = (0.1 * np.sin(2 * np.pi * 220 * np.arange(SAMPLE_RATE) / SAMPLE_RATE)).astype(np.float32)
+        self.transcribe(tone, max_new_tokens=8)
+        print(f"Modèle prêt ({time.perf_counter() - t0:.1f} s pour le test).", flush=True)
 
-    def transcribe(self, audio: np.ndarray) -> str:
+    def transcribe(self, audio: np.ndarray, max_new_tokens: int | None = None) -> str:
         if len(audio) < SAMPLE_RATE // 4:
             return ""
+        # Silence : rien à transcrire (Whisper a tendance à « inventer » du texte sur du silence).
+        if float(np.sqrt(np.mean(audio ** 2))) < 0.003:
+            return ""
+        # Longueur maximale proportionnelle à la durée : une récitation dépasse rarement ~12 jetons/s.
+        # Évite qu'une hallucination (texte répété) ne tourne jusqu'à 440 jetons, très lent sur CPU.
+        seconds = len(audio) / SAMPLE_RATE
+        limit = max_new_tokens or int(min(440, 24 + 14 * seconds))
         with self.lock:
             try:
-                out = self._run(audio, self.generate_kwargs)
+                out = self._run(audio, {**self.generate_kwargs, "max_new_tokens": limit})
             except (ValueError, TypeError):
                 if not self.generate_kwargs:
                     raise
                 # Option de langue refusée par ce modèle : on s'en passe désormais.
                 self.generate_kwargs = {}
-                out = self._run(audio, {})
+                out = self._run(audio, {"max_new_tokens": limit})
         return (out.get("text") or "").strip()
 
     def _run(self, audio: np.ndarray, generate_kwargs: dict) -> dict:
         # Dictionnaire neuf à chaque appel : le pipeline le modifie (il en retire la clé « raw »).
         inputs = {"raw": audio, "sampling_rate": SAMPLE_RATE}
-        if generate_kwargs:
-            return self.pipe(inputs, generate_kwargs=generate_kwargs)
-        return self.pipe(inputs)
+        return self.pipe(inputs, generate_kwargs=generate_kwargs)
 
 
 def make_handler(engine: Transcriber):
