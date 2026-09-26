@@ -67,11 +67,17 @@ function Test-Cuda {
 if ((Get-Command nvidia-smi -ErrorAction SilentlyContinue) -and -not (Test-Cuda)) {
     $smi = (& nvidia-smi 2>$null) -join "`n"
     $driverCuda = if ($smi -match "CUDA Version:\s*(\d+)\.(\d+)") { [double]("$($Matches[1]).$($Matches[2])") } else { 0 }
-    Write-Host "Carte NVIDIA détectée ; le pilote accepte CUDA jusqu'à $driverCuda."
+    # Génération de la carte (« compute capability ») : 6.x = Pascal (GTX 10xx), 7.5 = Turing, 8.x = Ampere…
+    $cap = (& nvidia-smi --query-gpu=name,compute_cap --format=csv,noheader 2>$null | Select-Object -First 1)
+    $gpuName = ""; $computeCap = 0
+    if ($cap -match "^(.*),\s*(\d+)\.(\d+)\s*$") { $gpuName = $Matches[1].Trim(); $computeCap = [double]("$($Matches[2]).$($Matches[3])") }
+    Write-Host "Carte NVIDIA détectée $gpuName ; le pilote accepte CUDA jusqu'à $driverCuda."
 
-    # Versions de PyTorch CUDA disponibles, de la plus récente à la plus ancienne, limitées à ce que le pilote accepte.
-    $builds = @(@{ Tag = "cu130"; Cuda = 13.0 }, @{ Tag = "cu129"; Cuda = 12.9 }, @{ Tag = "cu128"; Cuda = 12.8 }, @{ Tag = "cu126"; Cuda = 12.6 }) |
-        Where-Object { $_.Cuda -le $driverCuda }
+    # Versions de PyTorch CUDA, de la plus récente à la plus ancienne, limitées à ce que le pilote accepte.
+    # Les builds CUDA 12.8+ n'incluent plus le code des cartes Maxwell/Pascal (génération < 7.0) : seul cu126 convient.
+    $builds = @(@{ Tag = "cu130"; Cuda = 13.0; MinCap = 7.5 }, @{ Tag = "cu129"; Cuda = 12.9; MinCap = 7.0 },
+                @{ Tag = "cu128"; Cuda = 12.8; MinCap = 7.0 }, @{ Tag = "cu126"; Cuda = 12.6; MinCap = 5.0 }) |
+        Where-Object { $_.Cuda -le $driverCuda -and ($computeCap -eq 0 -or $computeCap -ge $_.MinCap) }
 
     $ok = $false
     foreach ($b in $builds) {

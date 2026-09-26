@@ -76,8 +76,12 @@ class Transcriber:
             print("Attention : grand modèle sans carte graphique, chaque phrase prendra plusieurs secondes.", flush=True)
         print(f"Chargement de {model} sur {device}…", flush=True)
 
-        # Demi-précision sur GPU : deux fois moins de mémoire, plus rapide, même qualité.
-        dtype = torch.float16 if gpu else torch.float32
+        # Demi-précision sur GPU récent : deux fois moins de mémoire, plus rapide, même qualité.
+        # Les cartes Pascal (GTX 10xx, génération 6.x) calculent très lentement en demi-précision : pleine précision.
+        half = gpu and torch.cuda.get_device_capability(0)[0] >= 7
+        dtype = torch.float16 if half else torch.float32
+        if gpu and not half and model == MODELS["large"]:
+            print("Attention : « large » en pleine précision demande ~6 Go de mémoire graphique ; préférez « turbo ».", flush=True)
         try:
             self.pipe = pipeline("automatic-speech-recognition", model=model, device=device, dtype=dtype)
         except TypeError:  # anciennes versions de Transformers
